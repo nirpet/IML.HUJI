@@ -1,7 +1,7 @@
 from __future__ import annotations
 import numpy as np
+import numpy.random
 from numpy.linalg import inv, det, slogdet
-
 
 class UnivariateGaussian:
     """
@@ -51,7 +51,12 @@ class UnivariateGaussian:
         Sets `self.mu_`, `self.var_` attributes according to calculated estimation (where
         estimator is either biased or unbiased). Then sets `self.fitted_` attribute to `True`
         """
-        raise NotImplementedError()
+
+        self.mu_ = numpy.mean(X)
+        if self.biased_:
+            self.var_ = numpy.var(X)
+        else:
+            self.var_ = numpy.var(X, ddof=1)
 
         self.fitted_ = True
         return self
