@@ -1,12 +1,17 @@
 from __future__ import annotations
+
+import math
+
 import numpy as np
 import numpy.random
 from numpy.linalg import inv, det, slogdet
+
 
 class UnivariateGaussian:
     """
     Class for univariate Gaussian Distribution Estimator
     """
+
     def __init__(self, biased_var: bool = False) -> UnivariateGaussian:
         """
         Estimator for univariate Gaussian mean and variance parameters
@@ -81,7 +86,12 @@ class UnivariateGaussian:
         """
         if not self.fitted_:
             raise ValueError("Estimator must first be fitted before calling `pdf` function")
-        raise NotImplementedError()
+        deviation = math.sqrt(self.var_)
+        Y = np.empty(len(X));
+        for i in range(len(X)):
+            Y[i] = (1.0 / (deviation * math.sqrt(2 * math.pi))) * math.exp(-0.5 * ((X[i] - self.mu_) / deviation) ** 2)
+
+        return Y
 
     @staticmethod
     def log_likelihood(mu: float, sigma: float, X: np.ndarray) -> float:
@@ -102,13 +112,15 @@ class UnivariateGaussian:
         log_likelihood: float
             log-likelihood calculated
         """
-        raise NotImplementedError()
+        return (1.0 / math.pow(sigma * math.sqrt(2 * math.pi), len(X))) * \
+               math.exp(-0.5 / (sigma ** 2) * (X - mu).square().sum())
 
 
 class MultivariateGaussian:
     """
     Class for multivariate Gaussian Distribution Estimator
     """
+
     def __init__(self):
         """
         Initialize an instance of multivariate Gaussian estimator

@@ -24,12 +24,15 @@ def test_univariate_gaussian():
         estimation_dist[i] = np.abs(mean - np.mean(X[:sample_sizes[i]]))
 
     fig = go.Figure([go.Scatter(x=sample_sizes, y=estimation_dist, mode='markers+lines', marker=dict(color="black"))],
-            layout=go.Layout(title_text=r"$\text{distance from actual mean by sample size}$", height=300))
+                    layout=go.Layout(title_text=r"$\text{distance from actual mean by sample size}$", height=300))
     fig.show()
 
-
     # # Question 3 - Plotting Empirical PDF of fitted model
-    # raise NotImplementedError()
+    X.sort()
+    pdf_values = univariate_gaussian.pdf(X)
+    fig2 = go.Figure([go.Scatter(x=X, y=pdf_values, mode='markers+lines', marker=dict(color="black"))],
+                     layout=go.Layout(title_text=r"$\text{pdf values}$", height=300))
+    fig2.show()
 
 
 def test_multivariate_gaussian():
@@ -37,13 +40,13 @@ def test_multivariate_gaussian():
     raise NotImplementedError()
 
     # Question 5 - Likelihood evaluation
-    raise NotImplementedError()
+    # raise NotImplementedError()
 
     # Question 6 - Maximum likelihood
-    raise NotImplementedError()
+    # raise NotImplementedError()
 
 
 if __name__ == '__main__':
     np.random.seed(0)
     test_univariate_gaussian()
-    # test_multivariate_gaussian()
+    test_multivariate_gaussian()
