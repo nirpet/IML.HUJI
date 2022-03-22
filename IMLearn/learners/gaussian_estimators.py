@@ -87,7 +87,7 @@ class UnivariateGaussian:
         if not self.fitted_:
             raise ValueError("Estimator must first be fitted before calling `pdf` function")
         deviation = math.sqrt(self.var_)
-        Y = np.empty(len(X));
+        Y = np.empty(len(X))
         for i in range(len(X)):
             Y[i] = (1.0 / (deviation * math.sqrt(2 * math.pi))) * math.exp(-0.5 * ((X[i] - self.mu_) / deviation) ** 2)
 
@@ -160,7 +160,8 @@ class MultivariateGaussian:
         Sets `self.mu_`, `self.cov_` attributes according to calculated estimation.
         Then sets `self.fitted_` attribute to `True`
         """
-        raise NotImplementedError()
+        self.mu_ = numpy.mean(X, axis=0)
+        self.cov_ = numpy.cov(X, rowvar=False)
 
         self.fitted_ = True
         return self
@@ -185,7 +186,17 @@ class MultivariateGaussian:
         """
         if not self.fitted_:
             raise ValueError("Estimator must first be fitted before calling `pdf` function")
-        raise NotImplementedError()
+
+        cov_det = numpy.linalg.det(self.cov_)
+        normal_dist_constant = 1.0 / (math.pow((2 * math.pi), float(len(X[0])) / 2) * math.pow(cov_det, 1.0 / 2))
+
+        Y = np.empty(len(X))
+        for i in range(len(X)):
+            x_mu = X[i] - self.mu_
+            cov_inverse = self.cov_.I
+            Y[i] = normal_dist_constant * math.pow(math.e, -0.5 * (x_mu * cov_inverse * x_mu.T))
+
+        return Y
 
     @staticmethod
     def log_likelihood(mu: np.ndarray, cov: np.ndarray, X: np.ndarray) -> float:
@@ -206,4 +217,15 @@ class MultivariateGaussian:
         log_likelihood: float
             log-likelihood calculated
         """
-        raise NotImplementedError()
+        m = len(X)
+        d = len(cov)
+        cov_det = numpy.linalg.det(cov)
+
+        inverse = np.linalg.inv(cov)
+        x_mu = X-mu
+        first_sum = -(1.0/2) * np.sum(x_mu @ inverse * x_mu)
+        second_sum = - (float(d * m) / 2 * math.log(2 * math.pi))
+        third_sum = -(float(m) / 2 * math.log(cov_det))
+
+        return first_sum + second_sum + third_sum
+

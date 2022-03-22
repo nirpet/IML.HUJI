@@ -2,6 +2,7 @@ from IMLearn.learners import UnivariateGaussian, MultivariateGaussian
 import numpy as np
 import plotly.graph_objects as go
 import plotly.io as pio
+import plotly.express as px
 
 pio.templates.default = "simple_white"
 
@@ -37,16 +38,39 @@ def test_univariate_gaussian():
 
 def test_multivariate_gaussian():
     # Question 4 - Draw samples and print fitted model
-    raise NotImplementedError()
+    multivariate_gaussian = MultivariateGaussian()
+    mean = [0, 0, 4, 0]
+    cov = [[1, 0.2, 0, 0.5],
+           [0.2, 2, 0, 0],
+           [0, 0, 1, 0],
+           [0.5, 0, 0, 1]]
+
+    X = np.random.multivariate_normal(mean, cov, 1000)
+    multivariate_gaussian.fit(X)
+
+    print(multivariate_gaussian.mu_)
+    print(multivariate_gaussian.cov_)
 
     # Question 5 - Likelihood evaluation
-    # raise NotImplementedError()
+
+    mean_values = np.linspace(-10, 10, 200)
+    log_likelihood_data = np.empty((200, 200))
+    for i in range(200):
+        for j in range(200):
+            mu = [mean_values[i], 0, mean_values[j], 0]
+            log_likelihood_data[i][j] = multivariate_gaussian.log_likelihood(mu, cov, X)
+
+    # fig = px.imshow(log_likelihood_data,
+    #                 labels=dict(x="f1", y="f3", color="log likelihood"),
+    #                 x=mean_values,
+    #                 y=mean_values)
+    # fig.show()
 
     # Question 6 - Maximum likelihood
-    # raise NotImplementedError()
-
+    max_likelihood_index = np.unravel_index(log_likelihood_data.argmax(), log_likelihood_data.shape)
+    print(log_likelihood_data[max_likelihood_index])
 
 if __name__ == '__main__':
     np.random.seed(0)
-    test_univariate_gaussian()
+    # test_univariate_gaussian()
     test_multivariate_gaussian()
