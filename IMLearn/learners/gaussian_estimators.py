@@ -112,8 +112,8 @@ class UnivariateGaussian:
         log_likelihood: float
             log-likelihood calculated
         """
-        return (1.0 / math.pow(sigma * math.sqrt(2 * math.pi), len(X))) * \
-               math.exp(-0.5 / (sigma ** 2) * (X - mu).square().sum())
+        return (math.log(1.0 / math.pow((sigma ** 2) * 2 * math.pi, float(len(X)) / 2))) * (
+                    -0.5 / (sigma ** 2) * (np.square(X - mu)).sum())
 
 
 class MultivariateGaussian:
@@ -222,10 +222,9 @@ class MultivariateGaussian:
         cov_det = numpy.linalg.det(cov)
 
         inverse = np.linalg.inv(cov)
-        x_mu = X-mu
-        first_sum = -(1.0/2) * np.sum(x_mu @ inverse * x_mu)
+        x_mu = X - mu
+        first_sum = -(1.0 / 2) * np.sum(x_mu @ inverse * x_mu)
         second_sum = - (float(d * m) / 2 * math.log(2 * math.pi))
         third_sum = -(float(m) / 2 * math.log(cov_det))
 
         return first_sum + second_sum + third_sum
-

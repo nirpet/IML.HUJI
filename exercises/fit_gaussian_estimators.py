@@ -25,14 +25,20 @@ def test_univariate_gaussian():
         estimation_dist[i] = np.abs(mean - np.mean(X[:sample_sizes[i]]))
 
     fig = go.Figure([go.Scatter(x=sample_sizes, y=estimation_dist, mode='markers+lines', marker=dict(color="black"))],
-                    layout=go.Layout(title_text=r"$\text{distance from actual mean by sample size}$", height=300))
+                    layout=go.Layout(title_text=r"$\text{distance from actual mean by sample size}$",
+                                     xaxis_title="sample size",
+                                     yaxis_title="distance from actual mean",
+                                     height=300))
     fig.show()
 
     # # Question 3 - Plotting Empirical PDF of fitted model
     X.sort()
     pdf_values = univariate_gaussian.pdf(X)
     fig2 = go.Figure([go.Scatter(x=X, y=pdf_values, mode='markers+lines', marker=dict(color="black"))],
-                     layout=go.Layout(title_text=r"$\text{pdf values}$", height=300))
+                     layout=go.Layout(title_text=r"$\text{pdf values}$",
+                                      xaxis_title="sample",
+                                      yaxis_title="pdf value",
+                                      height=300))
     fig2.show()
 
 
@@ -57,20 +63,19 @@ def test_multivariate_gaussian():
     log_likelihood_data = np.empty((200, 200))
     for i in range(200):
         for j in range(200):
-            mu = [mean_values[i], 0, mean_values[j], 0]
+            mu = [mean_values[j], 0, mean_values[i], 0]
             log_likelihood_data[i][j] = multivariate_gaussian.log_likelihood(mu, cov, X)
 
-    # fig = px.imshow(log_likelihood_data,
-    #                 labels=dict(x="f1", y="f3", color="log likelihood"),
-    #                 x=mean_values,
-    #                 y=mean_values)
-    # fig.show()
+    fig = px.imshow(log_likelihood_data,
+                    title="log likelihood ",
+                    labels=dict(x="f1", y="f3", color="log likelihood"),
+                    x=mean_values,
+                    y=mean_values)
 
-    # Question 6 - Maximum likelihood
-    max_likelihood_index = np.unravel_index(log_likelihood_data.argmax(), log_likelihood_data.shape)
-    print(log_likelihood_data[max_likelihood_index])
+    fig.show()
+
 
 if __name__ == '__main__':
     np.random.seed(0)
-    # test_univariate_gaussian()
+    test_univariate_gaussian()
     test_multivariate_gaussian()
