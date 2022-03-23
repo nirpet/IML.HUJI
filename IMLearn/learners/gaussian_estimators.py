@@ -1,4 +1,7 @@
 from __future__ import annotations
+
+import math
+
 import numpy as np
 import numpy.random
 from numpy.linalg import inv, det, slogdet
@@ -184,15 +187,10 @@ class MultivariateGaussian:
             raise ValueError("Estimator must first be fitted before calling `pdf` function")
 
         cov_det = numpy.linalg.det(self.cov_)
-        normal_dist_constant = 1.0 / (np.pow((2 * np.pi), float(len(X[0])) / 2) * np.pow(cov_det, 1.0 / 2))
-
-        Y = np.empty(len(X))
-        for i in range(len(X)):
-            x_mu = X[i] - self.mu_
-            cov_inverse = self.cov_.I
-            Y[i] = normal_dist_constant * np.pow(np.e, -0.5 * (x_mu * cov_inverse * x_mu.T))
-
-        return Y
+        normal_dist_constant = 1.0 / (math.pow((2 * np.pi), float(len(X[0])) / 2) * math.pow(cov_det, 1.0 / 2))
+        cov_inverse = np.linalg.inv(self.cov_)
+        x_mu = X - self.mu_
+        return normal_dist_constant * np.exp(-0.5 * (x_mu @ cov_inverse * x_mu))
 
     @staticmethod
     def log_likelihood(mu: np.ndarray, cov: np.ndarray, X: np.ndarray) -> float:
@@ -217,9 +215,9 @@ class MultivariateGaussian:
         d = len(cov)
         cov_det = numpy.linalg.det(cov)
 
-        inverse = np.linalg.inv(cov)
+        cov_inverse = np.linalg.inv(cov)
         x_mu = X - mu
-        first_sum = -(1.0 / 2) * np.sum(x_mu @ inverse * x_mu)
+        first_sum = -(1.0 / 2) * np.sum(x_mu @ cov_inverse * x_mu)
         second_sum = - (float(d * m) / 2 * np.log(2 * np.pi))
         third_sum = -(float(m) / 2 * np.log(cov_det))
 

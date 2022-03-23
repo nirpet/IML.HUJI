@@ -42,6 +42,8 @@ def test_univariate_gaussian():
                                       height=600))
     fig2.show()
 
+    # We expected to see a gaussian around the actual mean (10)
+
 
 def test_multivariate_gaussian():
     # Question 4 - Draw samples and print fitted model
