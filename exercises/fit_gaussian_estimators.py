@@ -1,3 +1,5 @@
+import math
+
 from IMLearn.learners import UnivariateGaussian, MultivariateGaussian
 import numpy as np
 import plotly.graph_objects as go
@@ -10,13 +12,18 @@ pio.templates.default = "simple_white"
 def test_univariate_gaussian():
     univariate_gaussian = UnivariateGaussian()
     mean = 10
-    var = 1
+    sigma = 1
     sample_size = 1000
 
     # Question 1 - Draw samples and print fitted model
-    X = np.random.normal(mean, var, sample_size)
+    X = np.random.normal(mean, sigma, sample_size)
     univariate_gaussian.fit(X)
     print('(' + str(univariate_gaussian.mu_) + ', ' + str(univariate_gaussian.var_) + ')')
+
+    test = np.array([1, 5, 2, 3, 8, -4, -2, 5, 1, 10, -10, 4, 5, 2, 7, 1, 1, 3, 2, -1, -3, 1, -4, 1, 2, 1,
+          -4, -4, 1, 3, 2, 6, -6, 8, 3, -6, 4, 1, -2, 3, 1, 4, 1, 4, -2, 3, -1, 0, 3, 5, 0, -2])
+    print(univariate_gaussian.log_likelihood(1, 1, test))
+    print(univariate_gaussian.log_likelihood(10, 1, test))
 
     # # Question 2 - Empirically showing sample mean is consistent
     sample_sizes = np.arange(10, 1010, 10)

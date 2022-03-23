@@ -1,7 +1,4 @@
 from __future__ import annotations
-
-import math
-
 import numpy as np
 import numpy.random
 from numpy.linalg import inv, det, slogdet
@@ -86,10 +83,10 @@ class UnivariateGaussian:
         """
         if not self.fitted_:
             raise ValueError("Estimator must first be fitted before calling `pdf` function")
-        deviation = math.sqrt(self.var_)
+        deviation = np.sqrt(self.var_)
         Y = np.empty(len(X))
         for i in range(len(X)):
-            Y[i] = (1.0 / (deviation * math.sqrt(2 * math.pi))) * math.exp(-0.5 * ((X[i] - self.mu_) / deviation) ** 2)
+            Y[i] = (1.0 / (deviation * np.sqrt(2 * np.pi))) * np.exp(-0.5 * ((X[i] - self.mu_) / deviation) ** 2)
 
         return Y
 
@@ -112,8 +109,7 @@ class UnivariateGaussian:
         log_likelihood: float
             log-likelihood calculated
         """
-        return (math.log(1.0 / math.pow((sigma ** 2) * 2 * math.pi, float(len(X)) / 2))) * (
-                    -0.5 / (sigma ** 2) * (np.square(X - mu)).sum())
+        return (float(len(X))/2) * (-np.log(2 * np.pi * (sigma**2))) - (0.5 / (sigma ** 2) * (np.square(X - mu)).sum())
 
 
 class MultivariateGaussian:
@@ -188,13 +184,13 @@ class MultivariateGaussian:
             raise ValueError("Estimator must first be fitted before calling `pdf` function")
 
         cov_det = numpy.linalg.det(self.cov_)
-        normal_dist_constant = 1.0 / (math.pow((2 * math.pi), float(len(X[0])) / 2) * math.pow(cov_det, 1.0 / 2))
+        normal_dist_constant = 1.0 / (np.pow((2 * np.pi), float(len(X[0])) / 2) * np.pow(cov_det, 1.0 / 2))
 
         Y = np.empty(len(X))
         for i in range(len(X)):
             x_mu = X[i] - self.mu_
             cov_inverse = self.cov_.I
-            Y[i] = normal_dist_constant * math.pow(math.e, -0.5 * (x_mu * cov_inverse * x_mu.T))
+            Y[i] = normal_dist_constant * np.pow(np.e, -0.5 * (x_mu * cov_inverse * x_mu.T))
 
         return Y
 
@@ -224,7 +220,7 @@ class MultivariateGaussian:
         inverse = np.linalg.inv(cov)
         x_mu = X - mu
         first_sum = -(1.0 / 2) * np.sum(x_mu @ inverse * x_mu)
-        second_sum = - (float(d * m) / 2 * math.log(2 * math.pi))
-        third_sum = -(float(m) / 2 * math.log(cov_det))
+        second_sum = - (float(d * m) / 2 * np.log(2 * np.pi))
+        third_sum = -(float(m) / 2 * np.log(cov_det))
 
         return first_sum + second_sum + third_sum
