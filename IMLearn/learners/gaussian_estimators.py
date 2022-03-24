@@ -112,7 +112,8 @@ class UnivariateGaussian:
         log_likelihood: float
             log-likelihood calculated
         """
-        return (float(len(X))/2) * (-np.log(2 * np.pi * (sigma**2))) - (0.5 / (sigma ** 2) * (np.square(X - mu)).sum())
+        return (float(len(X)) / 2) * (-np.log(2 * np.pi * (sigma ** 2))) - (
+                0.5 / (sigma ** 2) * (np.square(X - mu)).sum())
 
 
 class MultivariateGaussian:
@@ -187,10 +188,15 @@ class MultivariateGaussian:
             raise ValueError("Estimator must first be fitted before calling `pdf` function")
 
         cov_det = numpy.linalg.det(self.cov_)
-        normal_dist_constant = 1.0 / (math.pow((2 * np.pi), float(len(X[0])) / 2) * math.pow(cov_det, 1.0 / 2))
+        normal_dist_constant = 1.0 / (np.sqrt(math.pow((2 * np.pi), np.shape(X)[1]) * cov_det))
         cov_inverse = np.linalg.inv(self.cov_)
+        Y = np.empty(len(X))
         x_mu = X - self.mu_
-        return normal_dist_constant * np.exp(-0.5 * (x_mu @ cov_inverse * x_mu))
+        for i in range(len(X)):
+            Y[i] = normal_dist_constant * np.exp(
+                -0.5 * np.matmul(np.transpose(x_mu[i]), np.matmul(cov_inverse, x_mu[i])))
+
+        return Y
 
     @staticmethod
     def log_likelihood(mu: np.ndarray, cov: np.ndarray, X: np.ndarray) -> float:
