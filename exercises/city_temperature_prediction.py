@@ -67,8 +67,8 @@ if __name__ == '__main__':
     fig.show()
 
     # Question 4 - Fitting model for different values of `k`
-    samples = pd.DataFrame(df['DayOfYear'].values)
-    response = pd.Series(df['Temp'].values)
+    samples = pd.Series(israel_temps['DayOfYear'].values)
+    response = pd.Series(israel_temps['Temp'].values)
     train_x, train_y, test_x, test_y = split_train_test(samples, response)
     loss_per_degree = np.empty(10)
 
@@ -77,24 +77,23 @@ if __name__ == '__main__':
         pf.fit(train_x.to_numpy(), train_y.to_numpy())
         loss_per_degree[k - 1] = round(pf.loss(test_x.to_numpy(), test_y.to_numpy()), 2)
 
-    fig = px.bar(y=loss_per_degree, title='Loss per polynomial fitting degree')
+    fig = px.bar(x=range(1, 11), y=loss_per_degree, title='Loss per polynomial fitting degree')
     fig.show()
 
     # Question 5 - Evaluating fitted model on different countries
-    k = 3
+    k = 5
     pf = PolynomialFitting(k)
+    pf.fit(samples.to_numpy(), response.to_numpy())
+
     countries = df['Country'].unique()
     error_by_country = np.empty(len(countries))
 
     for i in range(len(countries)):
         country = countries[i]
-        country_temps = df.loc[df['Country'] == country]
-        samples = df.drop(columns='Temp')
-        samples = pd.get_dummies(data=samples, columns=['Country', 'City'])
-        response = pd.Series(df['Temp'].values)
-        train_x, train_y, test_x, test_y = split_train_test(samples, response)
-        pf.fit(train_x.to_numpy(), train_y.to_numpy())
-        error_by_country[i] = pf.loss(test_x.to_numpy(), test_y.to_numpy())
+        country_temps = df[df['Country'] == country]
+        samples = pd.Series(country_temps['DayOfYear'].values)
+        response = pd.Series(country_temps['Temp'].values)
+        error_by_country[i] = pf.loss(samples.to_numpy(), response.to_numpy())
 
     fig = px.bar(x=countries, y=error_by_country, title='Error per country')
     fig.show()

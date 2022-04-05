@@ -29,10 +29,9 @@ def load_data(filename: str):
     df = pd.read_csv(filename)
     df = df.drop(columns='id')
     df = df.drop(columns='date')
+    df = df.dropna()
     # todo: remove corrupted data, add features, and create dummies
-    # zipcode_dummies = pd.get_dummies(full_data['zipcode'])
-    # full_data.drop('zipcode', 1)
-    # full_data.insert(zipcode_dummies.shape[0], 'zipcode', zipcode_dummies)
+    df = pd.get_dummies(df, columns=['zipcode'])
     samples = df.drop(columns='price')
     response = pd.Series(df['price'].values)
     return samples, response
