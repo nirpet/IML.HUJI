@@ -26,13 +26,16 @@ def load_data(filename: str):
     Design matrix and response vector (prices) - either as a single
     DataFrame or a Tuple[DataFrame, Series]
     """
-    full_data = pd.read_csv(filename)
-    full_data.drop('id')
-    full_data.drop('date')
-    zipcode_dummies = pd.get_dummies(full_data['zipcode'])
-    full_data.drop('zipcode')
-    full_data.insert(zipcode_dummies.shape[0], 'zipcode', zipcode_dummies)
-    return full_data
+    df = pd.read_csv(filename)
+    df = df.drop(columns='id')
+    df = df.drop(columns='date')
+    # todo: remove corrupted data, add features, and create dummies
+    # zipcode_dummies = pd.get_dummies(full_data['zipcode'])
+    # full_data.drop('zipcode', 1)
+    # full_data.insert(zipcode_dummies.shape[0], 'zipcode', zipcode_dummies)
+    samples = df.drop(columns='price')
+    response = pd.Series(df['price'].values)
+    return samples, response
 
 
 def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") -> NoReturn:
@@ -52,13 +55,18 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
     output_path: str (default ".")
         Path to folder in which plots are saved
     """
-    for feature_name in X.Keys:
-        pcf = np.cov(X[feature_name], y) / np.std(X[feature_name]) * np.std(y)
+
+    for (feature_name, feature_data) in X.iteritems():
+        cov = np.cov(feature_data, y)[0][0]
+        data_std = np.std(feature_data)
+        response_std = np.std(y)
+        pcf = cov / (data_std * response_std)
+        title = feature_name + " Pearson Correlation " + str(pcf)
         fig = go.Figure(
-            [go.Scatter(x=pcf, y=y, mode='markers+lines', marker=dict(color="black"))],
-            layout=go.Layout(title_text=r"$\text{Distance from actual mean by sample size}$",
-                             xaxis_title="sample size",
-                             yaxis_title="distance",
+            [go.Scatter(x=feature_data, y=y, mode='markers', marker=dict(color="black"))],
+            layout=go.Layout(title_text=r"$\text{" + title + "}$",
+                             xaxis_title=feature_name,
+                             yaxis_title='price',
                              width=800,
                              height=600))
         fig.write_image(output_path + "\\" + feature_name + ".jpeg")
@@ -70,7 +78,7 @@ if __name__ == '__main__':
     X, y = load_data("../datasets/house_prices.csv")
 
     # Question 2 - Feature evaluation with respect to response
-    feature_evaluation(X, y)
+    # feature_evaluation(X, y)
 
     # Question 3 - Split samples into training- and testing sets.
     train_x, train_y, test_x, test_y = split_train_test(X, y)
@@ -82,7 +90,6 @@ if __name__ == '__main__':
     #   3) Test fitted model over test set
     #   4) Store average and variance of loss over test set
     # Then plot average loss as function of training size with error ribbon of size (mean-2*std, mean+2*std)
-
     loss_per_percent = np.empty(91)
     sample_percent = np.arange(90) + 10
 
@@ -90,9 +97,9 @@ if __name__ == '__main__':
         for i in sample_percent:
             lr = LinearRegression(include_intercept=True)
             last_index = int(len(train_x) * i / 100)
-            lr.fit(X[:last_index], y[:last_index])
-            results = lr.predict(test_x)
-            loss_per_percent[i - 10] = lr.loss(results, )
+            lr.fit(X.to_numpy()[:last_index], y.to_numpy()[:last_index])
+            results = lr.predict(test_x.to_numpy())
+            loss_per_percent[i - 10] = lr.loss(results, test_y.to_numpy())
 
     xx, yy = np.meshgrid(np.arange(91) + 9, loss_per_percent)
     z = xx ** 2 + yy ** 2
@@ -106,5 +113,4 @@ if __name__ == '__main__':
 
     fig.update_layout(width=800, height=300, scene_aspectmode="cube",
                       scene=dict(camera=dict(eye=dict(x=-1.5, y=-1.5, z=.2))))
-    fig.write_image(f"../rss.png")
     fig.show()
