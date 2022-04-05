@@ -71,7 +71,7 @@ class LinearRegression(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        return np.matmul(self.coefs_[1], X)
+        return np.matmul(self.coefs_, X)
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """

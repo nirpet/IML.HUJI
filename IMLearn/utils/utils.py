@@ -34,20 +34,14 @@ def split_train_test(X: pd.DataFrame, y: pd.Series, train_proportion: float = .7
 
     """
     m = X.shape[0]
-    train_size = int(m * train_proportion)
+    shuffled_samples_indexes = np.arange(m)
+    np.random.shuffle(shuffled_samples_indexes)
+    X_shuffled = X.loc[shuffled_samples_indexes]
+    y_shuffled = y.loc[shuffled_samples_indexes]
 
-    shuffled_indices = np.arange(m)
-    np.random.shuffle(shuffled_indices)
-
-    X_shuffled = X.loc[shuffled_indices]
-    y_shuffled = y.loc[shuffled_indices]
-
-    train_X = X_shuffled[:train_size]
-    train_y = y_shuffled[:train_size]
-    test_X = X_shuffled[train_size:]
-    test_y = y_shuffled[train_size:]
-
-    return train_X, train_y, test_X, test_y
+    training_data_size = int(m * train_proportion)
+    return X_shuffled[:training_data_size], y_shuffled[:training_data_size], \
+           X_shuffled[training_data_size:], y_shuffled[training_data_size:]
 
 
 def confusion_matrix(a: np.ndarray, b: np.ndarray) -> np.ndarray:
