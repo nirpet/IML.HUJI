@@ -25,74 +25,74 @@ def load_data(filename: str) -> pd.DataFrame:
     Design matrix and response vector (Temp)
     """
 
-    dateparse = lambda dates: [datetime.strptime(d, '%Y-%m-%d %H:%M:%S') for d in dates]
+    dateparse = lambda dates: [datetime.strptime(d, '%Y-%m-%d') for d in dates]
     full_data = pd.read_csv(filename, parse_dates=['Date'], date_parser=dateparse)
-    full_data.dropna()
     day_of_year = np.empty(len(full_data['Date']))
     for i in range(len(full_data['Date'])):
         day_of_year[i] = full_data['Date'][i].timetuple().tm_yday
 
-    full_data.insert(day_of_year.shape[0], 'DayOfYear', day_of_year)
+    full_data.insert(full_data.shape[1], 'DayOfYear', day_of_year)
+    full_data = full_data.drop(columns='Date')
     return full_data
 
 
 if __name__ == '__main__':
     np.random.seed(0)
     # Question 1 - Load and preprocessing of city temperature dataset
-    data = load_data('City_Temperature.csv')
+    df = load_data('../datasets/City_Temperature.csv')
 
     # Question 2 - Exploring data for specific country
-    israel_temps = data.loc[data['Country'] == 'Israel']
+    israel_temps = df.loc[df['Country'] == 'Israel']
 
-    fig = go.Figure([go.Scatter(x=israel_temps['DayOfYear'], y=israel_temps['Temperature'], mode='markers+lines',
-                                marker=dict(color="black"))],
-                    layout=go.Layout(title_text=r"$\text{Distance from actual mean by sample size}$",
-                                     xaxis_title="Day of year",
-                                     yaxis_title="temperature",
-                                     width=800,
-                                     height=600))
+    fig = px.scatter(x=israel_temps['DayOfYear'], y=israel_temps['Temp'],
+                     color=israel_temps['Year'].astype(str),
+                     title="Israel temperatures based on day of year")
     fig.show()
 
     # Question 2 - Exploring data for specific country
-    standard_deviations_per_months = israel_temps.groupby('Month')['Temperature'].agg('std')
+    standard_deviations_per_months = israel_temps.groupby('Month')['Temp'].agg('std')
 
-    fig = px.bar(standard_deviations_per_months, x='month', y='std of temperature')
+    fig = px.bar(standard_deviations_per_months, y='Temp',
+                 title="Israel temperatures std by month")
     fig.show()
 
     # Question 3 - Exploring differences between countries
-    country_temp = data.groupby('Country', 'Month')['Temperature'].agg('avg', 'std')
-    fig = px.line(country_temp, x="month", y="average temp", error_y=country_temp['std'],
-                  title='Month average temperature of different countries')
-    fig.show()
+    country_temp = df.groupby(['Country', 'Month'])['Temp'].agg(['mean', 'std'])
+    # fig = px.line(country_temp, x='Month', y='mean', color='Country', error_y='std',
+    #               title='Month average temperature of different countries')
+    # fig.show()
 
     # Question 4 - Fitting model for different values of `k`
 
-    train_x, train_y, test_x, test_y = split_train_test(israel_temps.loc[:, israel_temps.columns != 'Temperature'],
-                                                        israel_temps['Temperature'])
+    samples = df.drop(columns='Temp')
+    samples = pd.get_dummies(data=samples, columns=['Country', 'City'])
+    response = pd.Series(df['Temp'].values)
+    train_x, train_y, test_x, test_y = split_train_test(samples, response)
     loss_per_degree = np.empty(10)
 
     for k in range(1, 10):
         pf = PolynomialFitting(k)
-        pf.fit(train_x, test_y)
-        loss_per_degree[k - 1] = round(pf.loss(test_x, test_y), 2)
+        pf.fit(train_x.to_numpy(), train_y.to_numpy())
+        loss_per_degree[k - 1] = round(pf.loss(test_x.to_numpy(), test_y.to_numpy()), 2)
 
-    fig = px.bar(loss_per_degree, x='degree', y='loss', title='Loss per polynomial fitting degree')
+    fig = px.bar(y=loss_per_degree, title='Loss per polynomial fitting degree')
     fig.show()
 
     # Question 5 - Evaluating fitted model on different countries
-    k = 5
+    k = 3
     pf = PolynomialFitting(k)
-    countries = data['Country'].unique()
+    countries = df['Country'].unique()
     error_by_country = np.empty(len(countries))
 
-    for i in len(countries):
+    for i in range(len(countries)):
         country = countries[i]
-        country_temps = data.loc[data['Country'] == country]
-        samples = country_temps.loc[:, country_temps.columns != 'Temperature']
-        results = country_temps['Temperature']
-        train_x, train_y, test_x, test_y = split_train_test(samples, results)
-        pf.fit(train_x, train_y)
-        error_by_country[i] = pf.loss(test_x, test_y)
+        country_temps = df.loc[df['Country'] == country]
+        samples = df.drop(columns='Temp')
+        samples = pd.get_dummies(data=samples, columns=['Country', 'City'])
+        response = pd.Series(df['Temp'].values)
+        train_x, train_y, test_x, test_y = split_train_test(samples, response)
+        pf.fit(train_x.to_numpy(), train_y.to_numpy())
+        error_by_country[i] = pf.loss(test_x.to_numpy(), test_y.to_numpy())
 
-    fig = px.bar(error_by_country, x='country', y='loss', title='Loss per country')
+    fig = px.bar(x=countries, y=error_by_country, title='Error per country')
     fig.show()

@@ -35,9 +35,10 @@ class PolynomialFitting(BaseEstimator):
         y : ndarray of shape (n_samples, )
             Responses of input data to fit to
         """
-        X_new = self.__transform(X)
+        transformed = self.__transform(X)
+        transformed = transformed.reshape(transformed.shape[0], transformed.shape[1] * transformed.shape[2])
 
-        self.lr.fit(X_new, y)
+        self.lr.fit(transformed, y)
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -54,7 +55,7 @@ class PolynomialFitting(BaseEstimator):
             Predicted responses of given samples
         """
         transformed = self.__transform(X)
-        transformed.reshape(transformed.shape[0], transformed.shape[0] * transformed.shape[1])
+        transformed = transformed.reshape(transformed.shape[0], transformed.shape[1] * transformed.shape[2])
         return self.lr.predict(transformed)
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
@@ -90,9 +91,8 @@ class PolynomialFitting(BaseEstimator):
         transformed: ndarray of shape (n_samples, k+1)
             Vandermonde matrix of given samples up to degree k
         """
-
-        transformed = np.ones(shape=(X.shape[0], X.shape[1], self.degree_ + 1))
-        vandermonde = np.empty(shape=(X.shape[1], self.degree_ + 1))
+        transformed = np.ones(shape=(X.shape[0], self.degree_ + 1, X.shape[1]))
+        vandermonde = np.empty(shape=(self.degree_ + 1, X.shape[1]))
         for i in range(X.shape[0]):
             for j in range(self.degree_ + 1):
                 vandermonde[j] = X[i] ** j
