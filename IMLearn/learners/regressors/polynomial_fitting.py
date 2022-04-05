@@ -9,6 +9,7 @@ class PolynomialFitting(BaseEstimator):
     """
     Polynomial Fitting using Least Squares estimation
     """
+
     def __init__(self, k: int) -> PolynomialFitting:
         """
         Instantiate a polynomial fitting estimator
@@ -19,7 +20,8 @@ class PolynomialFitting(BaseEstimator):
             Degree of polynomial to fit
         """
         super().__init__()
-        raise NotImplementedError()
+        self.degree_ = k
+        self.lr = LinearRegression()
 
     def _fit(self, X: np.ndarray, y: np.ndarray) -> NoReturn:
         """
@@ -33,7 +35,9 @@ class PolynomialFitting(BaseEstimator):
         y : ndarray of shape (n_samples, )
             Responses of input data to fit to
         """
-        raise NotImplementedError()
+        X_new = self.__transform(X)
+
+        self.lr.fit(X_new, y)
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -49,7 +53,9 @@ class PolynomialFitting(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        raise NotImplementedError()
+        transformed = self.__transform(X)
+        transformed.reshape(transformed.shape[0], transformed.shape[0] * transformed.shape[1])
+        return self.lr.predict(transformed)
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
@@ -68,7 +74,8 @@ class PolynomialFitting(BaseEstimator):
         loss : float
             Performance under MSE loss function
         """
-        raise NotImplementedError()
+        results = self.predict(X)
+        return self.lr.loss(results, y)
 
     def __transform(self, X: np.ndarray) -> np.ndarray:
         """
@@ -83,4 +90,12 @@ class PolynomialFitting(BaseEstimator):
         transformed: ndarray of shape (n_samples, k+1)
             Vandermonde matrix of given samples up to degree k
         """
-        raise NotImplementedError()
+
+        transformed = np.ones(shape=(X.shape[0], X.shape[1], self.degree_ + 1))
+        vandermonde = np.empty(shape=(X.shape[1], self.degree_ + 1))
+        for i in range(X.shape[0]):
+            for j in range(self.degree_ + 1):
+                vandermonde[j] = X[i] ** j
+            transformed[i] = vandermonde
+
+        return transformed
