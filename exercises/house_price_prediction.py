@@ -7,7 +7,6 @@ from typing import NoReturn
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
-import plotly.express as px
 import plotly.io as pio
 
 pio.templates.default = "simple_white"
@@ -30,8 +29,8 @@ def load_data(filename: str):
     df = df.drop(columns='id')
     df = df.drop(columns='date')
     df = df.dropna()
-    # todo: remove corrupted data, add features, and create dummies
     df = pd.get_dummies(df, columns=['zipcode'])
+    df = df[df['bedrooms'] < 20]
     samples = df.drop(columns='price')
     response = pd.Series(df['price'].values)
     return samples, response
@@ -54,7 +53,6 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
     output_path: str (default ".")
         Path to folder in which plots are saved
     """
-
     for (feature_name, feature_data) in X.iteritems():
         cov = np.cov(feature_data, y)[0][0]
         data_std = np.std(feature_data)
@@ -97,8 +95,7 @@ if __name__ == '__main__':
             lr = LinearRegression(include_intercept=True)
             last_index = int(len(train_x) * i / 100)
             lr.fit(X.to_numpy()[:last_index], y.to_numpy()[:last_index])
-            results = lr.predict(test_x.to_numpy())
-            loss_per_percent[i - 10] = lr.loss(results, test_y.to_numpy())
+            loss_per_percent[i - 10] = lr.loss(test_x.to_numpy(), test_y.to_numpy())
 
     xx, yy = np.meshgrid(np.arange(91) + 9, loss_per_percent)
     z = xx ** 2 + yy ** 2
@@ -110,6 +107,6 @@ if __name__ == '__main__':
                    contours=dict(z=dict(show=True)))],
         rows=[1, 1], cols=[1, 2])
 
-    fig.update_layout(width=800, height=300, scene_aspectmode="cube",
+    fig.update_layout(width=1000, height=1000, scene_aspectmode="cube",
                       scene=dict(camera=dict(eye=dict(x=-1.5, y=-1.5, z=.2))))
     fig.show()

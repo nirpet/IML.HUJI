@@ -1,12 +1,10 @@
-import IMLearn.learners.regressors.linear_regression
-from IMLearn.learners.regressors import PolynomialFitting
-from IMLearn.utils import split_train_test
-
 import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.io as pio
-import plotly.graph_objects as go
+
+from IMLearn.learners.regressors import PolynomialFitting
+from IMLearn.utils import split_train_test
 
 pio.templates.default = "simple_white"
 from datetime import datetime
@@ -24,19 +22,16 @@ def load_data(filename: str) -> pd.DataFrame:
     -------
     Design matrix and response vector (Temp)
     """
-
     dateparse = lambda dates: [datetime.strptime(d, '%Y-%m-%d') for d in dates]
-    full_data = pd.read_csv(filename, parse_dates=['Date'], date_parser=dateparse)
-    day_of_year = np.empty(len(full_data['Date']))
-    for i in range(len(full_data['Date'])):
-        day_of_year[i] = full_data['Date'][i].timetuple().tm_yday
+    data_frame = pd.read_csv(filename, parse_dates=['Date'], date_parser=dateparse)
+    day_of_year = np.empty(len(data_frame['Date']))
+    for i in range(len(data_frame['Date'])):
+        day_of_year[i] = data_frame['Date'][i].timetuple().tm_yday
 
-    full_data.insert(full_data.shape[1], 'DayOfYear', day_of_year)
-    full_data = full_data.drop(columns='Date')
-
-    full_data = full_data[full_data['Temp'] >= -35]
-
-    return full_data
+    data_frame.insert(data_frame.shape[1], 'DayOfYear', day_of_year)
+    data_frame = data_frame.drop(columns='Date')
+    data_frame = data_frame[data_frame['Temp'] >= -35]
+    return data_frame
 
 
 if __name__ == '__main__':

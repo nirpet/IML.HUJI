@@ -34,11 +34,8 @@ def split_train_test(X: pd.DataFrame, y: pd.Series, train_proportion: float = .7
 
     """
     m = X.shape[0]
-    shuffled_samples_indexes = np.arange(m)
-    np.random.shuffle(shuffled_samples_indexes)
-    X_shuffled = X.loc[shuffled_samples_indexes]
-    y_shuffled = y.loc[shuffled_samples_indexes]
-
+    X_shuffled = X.sample(frac=1)
+    y_shuffled = y.reindex_like(X_shuffled)
     training_data_size = int(m * train_proportion)
     return X_shuffled[:training_data_size], y_shuffled[:training_data_size], \
            X_shuffled[training_data_size:], y_shuffled[training_data_size:]
