@@ -33,6 +33,9 @@ def load_data(filename: str) -> pd.DataFrame:
 
     full_data.insert(full_data.shape[1], 'DayOfYear', day_of_year)
     full_data = full_data.drop(columns='Date')
+
+    full_data = full_data[full_data['Temp'] >= -35]
+
     return full_data
 
 
@@ -58,19 +61,18 @@ if __name__ == '__main__':
 
     # Question 3 - Exploring differences between countries
     country_temp = df.groupby(['Country', 'Month'])['Temp'].agg(['mean', 'std'])
-    # fig = px.line(country_temp, x='Month', y='mean', color='Country', error_y='std',
-    #               title='Month average temperature of different countries')
-    # fig.show()
+    country_temp = country_temp.reset_index()
+    fig = px.line(country_temp, x='Month', y='mean', color='Country', error_y='std', line_group='Country',
+                  title='Month average temperature of different countries')
+    fig.show()
 
     # Question 4 - Fitting model for different values of `k`
-
-    samples = df.drop(columns='Temp')
-    samples = pd.get_dummies(data=samples, columns=['Country', 'City'])
+    samples = pd.DataFrame(df['DayOfYear'].values)
     response = pd.Series(df['Temp'].values)
     train_x, train_y, test_x, test_y = split_train_test(samples, response)
     loss_per_degree = np.empty(10)
 
-    for k in range(1, 10):
+    for k in range(1, 11):
         pf = PolynomialFitting(k)
         pf.fit(train_x.to_numpy(), train_y.to_numpy())
         loss_per_degree[k - 1] = round(pf.loss(test_x.to_numpy(), test_y.to_numpy()), 2)

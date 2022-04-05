@@ -55,7 +55,7 @@ class LinearRegression(BaseEstimator):
             X = np.append(ones_vec, X, axis=1)
 
         X_dagger = np.linalg.pinv(X)
-        self.coefs_ = X_dagger.dot(y)
+        self.coefs_ = X_dagger @ y
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -75,7 +75,7 @@ class LinearRegression(BaseEstimator):
             ones_vec = np.ones((X.shape[0], 1))
             X = np.append(ones_vec, X, axis=1)
 
-        return X.dot(self.coefs_)
+        return X @ self.coefs_
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
@@ -94,5 +94,5 @@ class LinearRegression(BaseEstimator):
         loss : float
             Performance under MSE loss function
         """
-
-        return loss_functions.mean_square_error(y, X)
+        predicted = self.predict(X)
+        return loss_functions.mean_square_error(y, predicted)

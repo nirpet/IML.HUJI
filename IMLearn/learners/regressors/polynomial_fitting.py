@@ -21,7 +21,7 @@ class PolynomialFitting(BaseEstimator):
         """
         super().__init__()
         self.degree_ = k
-        self.lr = LinearRegression()
+        self.linearRegression = LinearRegression()
 
     def _fit(self, X: np.ndarray, y: np.ndarray) -> NoReturn:
         """
@@ -36,9 +36,7 @@ class PolynomialFitting(BaseEstimator):
             Responses of input data to fit to
         """
         transformed = self.__transform(X)
-        transformed = transformed.reshape(transformed.shape[0], transformed.shape[1] * transformed.shape[2])
-
-        self.lr.fit(transformed, y)
+        self.linearRegression.fit(transformed, y)
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -55,8 +53,7 @@ class PolynomialFitting(BaseEstimator):
             Predicted responses of given samples
         """
         transformed = self.__transform(X)
-        transformed = transformed.reshape(transformed.shape[0], transformed.shape[1] * transformed.shape[2])
-        return self.lr.predict(transformed)
+        return self.linearRegression.predict(transformed)
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
@@ -75,8 +72,8 @@ class PolynomialFitting(BaseEstimator):
         loss : float
             Performance under MSE loss function
         """
-        results = self.predict(X)
-        return self.lr.loss(results, y)
+        transformed = self.__transform(X)
+        return self.linearRegression.loss(transformed, y)
 
     def __transform(self, X: np.ndarray) -> np.ndarray:
         """
@@ -91,11 +88,4 @@ class PolynomialFitting(BaseEstimator):
         transformed: ndarray of shape (n_samples, k+1)
             Vandermonde matrix of given samples up to degree k
         """
-        transformed = np.ones(shape=(X.shape[0], self.degree_ + 1, X.shape[1]))
-        vandermonde = np.empty(shape=(self.degree_ + 1, X.shape[1]))
-        for i in range(X.shape[0]):
-            for j in range(self.degree_ + 1):
-                vandermonde[j] = X[i] ** j
-            transformed[i] = vandermonde
-
-        return transformed
+        return np.vander(X, self.degree_ + 1, True)
