@@ -42,7 +42,7 @@ if __name__ == '__main__':
     # Question 2 - Exploring data for specific country
     israel_temps = df.loc[df['Country'] == 'Israel']
 
-    fig = px.scatter(x=israel_temps['DayOfYear'], y=israel_temps['Temp'],
+    fig = px.scatter(israel_temps, x='DayOfYear', y='Temp',
                      color=israel_temps['Year'].astype(str),
                      title="Israel temperatures based on day of year")
     fig.show()

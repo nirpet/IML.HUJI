@@ -116,7 +116,7 @@ if __name__ == '__main__':
                                 line=dict(color="lightgrey"), showlegend=False)])
 
     fig.update_layout(
-        title_text=rf"$\text{{Loss and confidence per percentage of train size}}\mathcal{{N}}\left(0,2\right)$",
+        title_text=rf"$\text{{Loss and confidence per percentage of train size}}$",
         xaxis={"title": r"$sample percent$"},
         yaxis={"title": r"$loss$"})
     fig.show()
