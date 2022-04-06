@@ -54,7 +54,7 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
         Path to folder in which plots are saved
     """
     for (feature_name, feature_data) in X.iteritems():
-        cov = np.cov(feature_data, y)[0][0]
+        cov = np.cov(feature_data, y)[0][1]
         data_std = np.std(feature_data)
         response_std = np.std(y)
         pcf = cov / (data_std * response_std)
