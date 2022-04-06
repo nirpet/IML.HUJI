@@ -70,7 +70,9 @@ if __name__ == '__main__':
     for k in range(1, 11):
         pf = PolynomialFitting(k)
         pf.fit(train_x.to_numpy(), train_y.to_numpy())
-        loss_per_degree[k - 1] = round(pf.loss(test_x.to_numpy(), test_y.to_numpy()), 2)
+        loss = round(pf.loss(test_x.to_numpy(), test_y.to_numpy()), 2)
+        loss_per_degree[k - 1] = loss
+        print('Error for degree ' + str(k) + ': ' + str(loss))
 
     fig = px.bar(x=range(1, 11), y=loss_per_degree, title='Loss per polynomial fitting degree')
     fig.show()
