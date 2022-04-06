@@ -62,8 +62,8 @@ if __name__ == '__main__':
     fig.show()
 
     # Question 4 - Fitting model for different values of `k`
-    samples = pd.Series(israel_temps['DayOfYear'].values)
-    response = pd.Series(israel_temps['Temp'].values)
+    samples = israel_temps['DayOfYear']
+    response = israel_temps['Temp']
     train_x, train_y, test_x, test_y = split_train_test(samples, response)
     loss_per_degree = np.empty(10)
 

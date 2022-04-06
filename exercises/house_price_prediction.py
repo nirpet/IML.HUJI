@@ -32,7 +32,7 @@ def load_data(filename: str):
     df = pd.get_dummies(df, columns=['zipcode'])
     df = df[df['bedrooms'] < 20]
     samples = df.drop(columns='price')
-    response = pd.Series(df['price'].values)
+    response = df['price']
     return samples, response
 
 
@@ -75,7 +75,7 @@ if __name__ == '__main__':
     X, y = load_data("../datasets/house_prices.csv")
 
     # Question 2 - Feature evaluation with respect to response
-    # feature_evaluation(X, y)
+    feature_evaluation(X, y)
 
     # Question 3 - Split samples into training- and testing sets.
     train_x, train_y, test_x, test_y = split_train_test(X, y)
@@ -88,25 +88,35 @@ if __name__ == '__main__':
     #   4) Store average and variance of loss over test set
     # Then plot average loss as function of training size with error ribbon of size (mean-2*std, mean+2*std)
     loss_per_percent = np.empty(91)
+    std_per_percent = np.empty(91)
+    max_range_per_percent = np.empty(91)
+    min_range_per_percent = np.empty(91)
     sample_percent = np.arange(90) + 10
 
-    for j in range(10):
-        for i in sample_percent:
+    for i in sample_percent:
+        loss_per_run = np.empty(10)
+        for j in range(10):
             lr = LinearRegression(include_intercept=True)
+            X_shuffled = train_x.sample(frac=1)
+            y_shuffled = train_y.reindex_like(X_shuffled)
             last_index = int(len(train_x) * i / 100)
-            lr.fit(X.to_numpy()[:last_index], y.to_numpy()[:last_index])
-            loss_per_percent[i - 10] = lr.loss(test_x.to_numpy(), test_y.to_numpy())
+            lr.fit(X_shuffled.to_numpy()[:last_index], y_shuffled.to_numpy()[:last_index])
+            loss = lr.loss(test_x.to_numpy(), test_y.to_numpy())
+            loss_per_run[j] = loss
 
-    xx, yy = np.meshgrid(np.arange(91) + 9, loss_per_percent)
-    z = xx ** 2 + yy ** 2
-    fig = make_subplots(rows=1, cols=2, specs=[[{'type': 'scatter'}, {'type': 'scene'}]])
+        loss_per_percent[i - 10] = loss_per_run.mean()
+        std_per_percent[i - 10] = loss_per_run.std()
 
-    fig.add_traces(data=[
-        go.Contour(z=z, colorscale='Electric', showscale=False),
-        go.Surface(x=sample_percent, y=loss_per_percent, z=z, opacity=.8, colorscale='Electric',
-                   contours=dict(z=dict(show=True)))],
-        rows=[1, 1], cols=[1, 2])
+    fig = go.Figure([go.Scatter(x=sample_percent, y=loss_per_percent, mode="markers+lines", name="Mean Prediction",
+                                line=dict(dash="dash"), marker=dict(color="green", opacity=.7)),
+                     go.Scatter(x=sample_percent, y=loss_per_percent - 2 * std_per_percent, fill=None, mode="lines",
+                                line=dict(color="lightgrey"), showlegend=False),
+                     go.Scatter(x=sample_percent, y=loss_per_percent + 2 * std_per_percent, fill='tonexty',
+                                mode="lines",
+                                line=dict(color="lightgrey"), showlegend=False)])
 
-    fig.update_layout(width=1000, height=1000, scene_aspectmode="cube",
-                      scene=dict(camera=dict(eye=dict(x=-1.5, y=-1.5, z=.2))))
+    fig.update_layout(
+        title_text=rf"$\text{{Loss and confidence per percentage of train size}}\mathcal{{N}}\left(0,2\right)$",
+        xaxis={"title": r"$sample percent$"},
+        yaxis={"title": r"$loss$"})
     fig.show()
