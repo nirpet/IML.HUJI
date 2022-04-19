@@ -97,7 +97,7 @@ class LDA(BaseEstimator):
         for i in range(likelihoods.shape[1]):
             d = X[:, np.newaxis, :] - self.mu_[i]
             mahalanobis = np.sum(d.dot(inv(self.cov_)) * d, axis=2).flatten()
-            likelihoods[:, i] = np.exp(-.5 * mahalanobis) / np.sqrt((2 * np.pi) ** len(X) * cov_det)
+            likelihoods[:, i] = np.exp(-.5 * mahalanobis) / np.sqrt((2 * np.pi) ** len(X) * cov_det) * self.pi_[i]
 
         return likelihoods
 
