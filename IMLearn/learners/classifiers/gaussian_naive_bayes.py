@@ -45,8 +45,8 @@ class GaussianNaiveBayes(BaseEstimator):
         m = X.shape[0]
         self.classes_, n_k = np.unique(y, axis=0, return_counts=True)
         self.pi_ = n_k / m
-        self.mu_ = np.empty(self.classes_)
-        self.vars_ = np.empty(self.classes_)
+        self.mu_ = np.empty(self.classes_.shape[0])
+        self.vars_ = np.empty(self.classes_.shape[0])
         for i in range(self.mu_.shape[0]):
             X_k = X[y == self.classes_[i]]
             self.mu_[i] = (1.0 / n_k[i]) * np.sum(X_k)
