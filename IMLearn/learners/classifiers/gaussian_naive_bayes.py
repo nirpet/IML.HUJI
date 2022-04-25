@@ -1,11 +1,14 @@
 from typing import NoReturn
 from ...base import BaseEstimator
 import numpy as np
+from IMLearn.metrics.loss_functions import misclassification_error
+
 
 class GaussianNaiveBayes(BaseEstimator):
     """
     Gaussian Naive-Bayes classifier
     """
+
     def __init__(self):
         """
         Instantiate a Gaussian Naive Bayes classifier
@@ -39,7 +42,15 @@ class GaussianNaiveBayes(BaseEstimator):
         y : ndarray of shape (n_samples, )
             Responses of input data to fit to
         """
-        raise NotImplementedError()
+        m = X.shape[0]
+        self.classes_, n_k = np.unique(y, axis=0, return_counts=True)
+        self.pi_ = n_k / m
+        self.mu_ = np.empty(self.classes_)
+        self.vars_ = np.empty(self.classes_)
+        for i in range(self.mu_.shape[0]):
+            X_k = X[y == self.classes_[i]]
+            self.mu_[i] = (1.0 / n_k[i]) * np.sum(X_k)
+            self.vars_[i] = (1.0 / (n_k[i] - 1)) * np.sum(X_k - self.mu_[i])
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -94,4 +105,5 @@ class GaussianNaiveBayes(BaseEstimator):
         loss : float
             Performance under missclassification loss function
         """
-        raise NotImplementedError()
+        y_pred = self.predict(X)
+        return misclassification_error(y, y_pred)

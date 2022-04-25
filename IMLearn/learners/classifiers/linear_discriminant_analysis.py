@@ -2,7 +2,7 @@ from typing import NoReturn
 from ...base import BaseEstimator
 import numpy as np
 from numpy.linalg import det, inv
-
+from IMLearn.metrics.loss_functions import misclassification_error
 
 class LDA(BaseEstimator):
     """
@@ -50,10 +50,12 @@ class LDA(BaseEstimator):
         m = X.shape[0]
         self.classes_, n_k = np.unique(y, axis=0, return_counts=True)
         self.pi_ = n_k / m
-        self.mu_ = np.empty(self.classes_)
+        self.mu_ = np.empty(self.classes_.shape[0])
         for i in range(self.mu_.shape[0]):
             self.mu_[i] = (1.0 / n_k[i]) * np.sum(X[y == self.classes_[i]])
-        self.cov_ = (1.0 / m) * np.sum((X - self.mu_[y]) @ (X - self.mu_[y]))
+
+        mu_yi = np.vstack(self.mu_[y.astype(int)])
+        self.cov_ = (1.0 / m) * np.dot(X - mu_yi, (X - mu_yi).T)
         self._cov_inv = np.linalg.inv(self.cov_)
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
@@ -119,4 +121,4 @@ class LDA(BaseEstimator):
             Performance under missclassification loss function
         """
         y_pred = self.predict(X)
-        return np.mean(y_pred != y)
+        return misclassification_error(y, y_pred)
