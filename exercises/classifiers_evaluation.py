@@ -40,9 +40,10 @@ def run_perceptron():
     Create a line plot that shows the perceptron algorithm's training loss values (y-axis)
     as a function of the training iterations (x-axis).
     """
-    for n, f in [("Linearly Separable", "linearly_separable.npy"), ("Linearly Inseparable", "linearly_inseparable.npy")]:
+    for n, f in [("Linearly Separable", "linearly_separable.npy"),
+                 ("Linearly Inseparable", "linearly_inseparable.npy")]:
         # Load dataset
-        np.load(file="../datasets/"+f)
+        np.load(file="../datasets/" + f)
 
         # Fit Perceptron and record loss in each fit iteration
         losses = []
@@ -58,36 +59,39 @@ def compare_gaussian_classifiers():
     """
     for f in ["gaussian1.npy", "gaussian2.npy"]:
         # Load dataset
-        dataset = np.load(file="../datasets/"+f)
+        dataset = np.load(file="../datasets/" + f)
         y = dataset[:, -1]
         X = dataset[:, :-1]
 
-        # Fit models and predict over training set
-        train_x, train_y, test_x, test_y = split_train_test(pd.DataFrame(X), pd.Series(y))
-
         lda = LDA()
-        lda.fit(train_x.to_numpy(), train_y.to_numpy())
+        lda.fit(X, y)
         gnb = GaussianNaiveBayes()
-        gnb.fit(train_x.to_numpy(), train_y.to_numpy())
+        gnb.fit(X, y)
 
-        lda_y_pred = lda.predict(test_x.to_numpy())
-        gna_y_pred = gnb.predict(test_x.to_numpy())
+        lda_y_pred = lda.predict(X)
+        gnb_y_pred = gnb.predict(X)
 
-        lda_accuracy = np.mean(lda_y_pred == test_y)
-        gnb_accuracy = np.mean(gna_y_pred == test_y)
+        lda_accuracy = np.mean(lda_y_pred == y)
+        gnb_accuracy = np.mean(gnb_y_pred == y)
 
         # Plot a figure with two suplots, showing the Gaussian Naive Bayes predictions on the left and LDA predictions
         # on the right. Plot title should specify dataset used and subplot titles should specify algorithm and accuracy
         from IMLearn.metrics import accuracy
-        # model_names = ["Linear discriminant analysis", "Gaussian naive Bayes"]
-        # fig = make_subplots(rows=1, cols=2, subplot_titles=[rf"$\textbf{{{m}}}$" for m in model_names],
-        #                     horizontal_spacing=0.01, vertical_spacing=.03)
-        #
-        # fig.add_traces([decision_surface(m.fit(X, y).predict, lims[0], lims[1], showscale=False),
-        #                     go.Scatter(x=X[:, 0], y=X[:, 1], mode="markers", showlegend=False,
-        #                                marker=dict(color=y, symbol=symbols[y], colorscale=[custom[0], custom[-1]],
-        #                                            line=dict(color="black", width=1)))],
-        #                    rows=(i // 3) + 1, cols=(i % 3) + 1)
+        fig = make_subplots(rows=1, cols=2,
+                            subplot_titles=["Linear discriminant analysis, Accuracy: " + str(lda_accuracy),
+                                            "Gaussian naive Bayes, Accuracy: " + str(gnb_accuracy)],
+                            horizontal_spacing=0.01, vertical_spacing=.03, )
+        fig.update_layout(title="Dataset: " + f)
+
+        fig.add_traces(go.Scatter(x=X[:, 0], y=X[:, 1], mode="markers", showlegend=False,
+                                  marker=dict(color=lda_y_pred, symbol=y, size=15)),
+                       rows=1, cols=1)
+
+        fig.add_traces(go.Scatter(x=X[:, 0], y=X[:, 1], mode="markers", showlegend=False,
+                                  marker=dict(color=gnb_y_pred, symbol=y, size=15)),
+                       rows=1, cols=2)
+
+        fig.show()
         # fig.add_traces([decision_surface(m.fit(X, y).predict, lims[0], lims[1], showscale=False),
         #                 go.Scatter(x=X[:, 0], y=X[:, 1], mode="markers", showlegend=False,
         #                            marker=dict(color=y, symbol=symbols[y], colorscale=[custom[0], custom[-1]],

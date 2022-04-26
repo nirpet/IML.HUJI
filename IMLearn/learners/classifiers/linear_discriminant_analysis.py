@@ -56,7 +56,7 @@ class LDA(BaseEstimator):
             self.mu_[k] = np.mean(X[y == self.classes_[k]], axis=0)
 
         mu_yi = np.vstack(self.mu_[y.astype(int)])
-        self.cov_ = (1.0 / m) * np.dot((X - mu_yi).T, X - mu_yi)
+        self.cov_ = (1.0 / (m - self.classes_.shape[0])) * np.dot((X - mu_yi).T, X - mu_yi)
         self._cov_inv = np.linalg.inv(self.cov_)
 
     def _predict(self, X: np.ndarray) -> np.ndarray:

@@ -96,7 +96,7 @@ class GaussianNaiveBayes(BaseEstimator):
             for k in range(likelihoods.shape[1]):
                 for j in range(X.shape[1]):
                     likelihoods[i][k] += np.log(self.pi_[k]) - \
-                                         0.5 * (((X[i][j] - self.mu_[k][j]) / self.vars_[k][j]) ** 2)
+                                         0.5 * ((X[i][j] - self.mu_[k][j]) ** 2 / self.vars_[k][j])
 
         return likelihoods
 
