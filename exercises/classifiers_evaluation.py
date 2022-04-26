@@ -105,22 +105,10 @@ def compare_gaussian_classifiers():
         # Create subplots
         from IMLearn.metrics import accuracy
         fig = make_subplots(rows=1, cols=2,
-                            subplot_titles=["Linear discriminant analysis, Accuracy: " + str(lda_accuracy),
-                                            "Gaussian naive Bayes, Accuracy: " + str(gnb_accuracy)],
+                            subplot_titles=["Gaussian naive Bayes, Accuracy: " + str(gnb_accuracy)
+                                , "Linear discriminant analysis, Accuracy: " + str(lda_accuracy)],
                             horizontal_spacing=0.01, vertical_spacing=.03)
         fig.update_layout(title="Dataset: " + f, showlegend=False)
-        lda_results = go.Scatter(x=X[:, 0], y=X[:, 1], mode="markers", showlegend=False,
-                                 marker=dict(color=lda_y_pred, symbol=y, size=15))
-        lda_data = [lda_results]
-        for i in range(lda.classes_.shape[0]):
-            lda_ellipse = get_ellipse(lda.mu_[i], lda.cov_)
-            lda_X = go.Scatter(x=[lda.mu_[i][0]], y=[lda.mu_[i][1]], mode="markers", showlegend=False,
-                               marker=dict(color='black', symbol='x', size=30))
-            lda_data.append(lda_ellipse)
-            lda_data.append(lda_X)
-
-        fig.add_traces(lda_data, rows=1, cols=1)
-
         gnb_results = go.Scatter(x=X[:, 0], y=X[:, 1], mode="markers", showlegend=False,
                                  marker=dict(color=gnb_y_pred, symbol=y, size=15))
         gnb_data = [gnb_results]
@@ -135,8 +123,21 @@ def compare_gaussian_classifiers():
             gnb_data.append(gnb_ellipse)
             gnb_data.append(gnb_X)
 
-        fig.add_traces(gnb_data, rows=1, cols=2)
+        fig.add_traces(gnb_data, rows=1, cols=1)
+
+        lda_results = go.Scatter(x=X[:, 0], y=X[:, 1], mode="markers", showlegend=False,
+                                 marker=dict(color=lda_y_pred, symbol=y, size=15))
+        lda_data = [lda_results]
+        for i in range(lda.classes_.shape[0]):
+            lda_ellipse = get_ellipse(lda.mu_[i], lda.cov_)
+            lda_X = go.Scatter(x=[lda.mu_[i][0]], y=[lda.mu_[i][1]], mode="markers", showlegend=False,
+                               marker=dict(color='black', symbol='x', size=30))
+            lda_data.append(lda_ellipse)
+            lda_data.append(lda_X)
+
+        fig.add_traces(lda_data, rows=1, cols=2)
         fig.show()
+
 
 if __name__ == '__main__':
     np.random.seed(0)
