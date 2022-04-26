@@ -2,7 +2,6 @@ from typing import NoReturn
 from ...base import BaseEstimator
 import numpy as np
 from numpy.linalg import det, inv
-from IMLearn.metrics.loss_functions import misclassification_error
 
 
 class LDA(BaseEstimator):
