@@ -51,9 +51,9 @@ class LDA(BaseEstimator):
         m = X.shape[0]
         self.classes_, n_k = np.unique(y, axis=0, return_counts=True)
         self.pi_ = n_k / m
-        self.mu_ = np.empty(self.classes_.shape[0])
-        for i in range(self.mu_.shape[0]):
-            self.mu_[i] = (1.0 / n_k[i]) * np.sum(X[y == self.classes_[i]])
+        self.mu_ = np.empty(shape=(self.classes_.shape[0], X.shape[1]))
+        for k in range(self.mu_.shape[0]):
+            self.mu_[k] = np.mean(X[y == self.classes_[k]], axis=0)
 
         mu_yi = np.vstack(self.mu_[y.astype(int)])
         self.cov_ = (1.0 / m) * np.dot((X - mu_yi).T, X - mu_yi)
@@ -73,9 +73,17 @@ class LDA(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        a = self._cov_inv.dot(self.mu_)
-        b = np.log(self.pi_) - 0.5 * np.dot(self.mu_.T, self._cov_inv.dot(self.mu_))
-        return self.classes_[np.argmax(a.dot(X) + b)]
+        a_k = np.empty(shape=(self.classes_.shape[0], self.mu_.shape[1]))
+        b_k = np.empty(self.classes_.shape[0])
+        for k in range(self.classes_.shape[0]):
+            a_k[k] = self._cov_inv.dot(self.mu_[k])
+            b_k[k] = np.log(self.pi_[k]) - 0.5 * (self.mu_[k].T.dot(self._cov_inv.dot(self.mu_[k])))
+
+        responses = np.empty(X.shape[0])
+        for i in range(X.shape[0]):
+            responses[i] = self.classes_[np.argmax(a_k.dot(X[i]) + b_k)]
+
+        return responses
 
     def likelihood(self, X: np.ndarray) -> np.ndarray:
         """
@@ -95,7 +103,7 @@ class LDA(BaseEstimator):
         if not self.fitted_:
             raise ValueError("Estimator must first be fitted before calling `likelihood` function")
 
-        likelihoods = np.empty(X.shape[0], self.classes_.shape[0])
+        likelihoods = np.empty(shape=(X.shape[0], self.classes_.shape[0]))
         cov_det = np.linalg.det(self.cov_)
         for i in range(likelihoods.shape[1]):
             d = X[:, np.newaxis, :] - self.mu_[i]
