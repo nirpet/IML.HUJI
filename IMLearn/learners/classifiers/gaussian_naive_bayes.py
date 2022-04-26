@@ -45,12 +45,12 @@ class GaussianNaiveBayes(BaseEstimator):
         m = X.shape[0]
         self.classes_, n_k = np.unique(y, axis=0, return_counts=True)
         self.pi_ = n_k / m
-        self.mu_ = np.empty(self.classes_.shape[0])
-        self.vars_ = np.empty(self.classes_.shape[0])
-        for i in range(self.mu_.shape[0]):
-            X_k = X[y == self.classes_[i]]
-            self.mu_[i] = (1.0 / n_k[i]) * np.sum(X_k)
-            self.vars_[i] = (1.0 / (n_k[i] - 1)) * np.sum(X_k - self.mu_[i])
+        self.mu_ = np.empty(shape=(self.classes_.shape[0], X.shape[1]))
+        self.vars_ = np.empty(shape=(self.classes_.shape[0], X.shape[1]))
+        for k in range(self.mu_.shape[0]):
+            X_k = X[y == self.classes_[k]]
+            self.mu_[k] = np.mean(X_k, axis=0)
+            self.vars_[k] = np.var(X_k, ddof=1, axis=0)
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -66,8 +66,12 @@ class GaussianNaiveBayes(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        prob = np.log(self.pi_) - 0.5 * (((X - self.mu_) / self.vars_) ** 2)
-        return self.classes_[np.argmax(prob)]
+        likelihood = self.likelihood(X)
+        responses = np.empty(X.shape[0])
+        for i in range(responses.shape[0]):
+            responses[i] = np.argmax(likelihood[i])
+
+        return responses
 
     def likelihood(self, X: np.ndarray) -> np.ndarray:
         """
@@ -87,11 +91,12 @@ class GaussianNaiveBayes(BaseEstimator):
         if not self.fitted_:
             raise ValueError("Estimator must first be fitted before calling `likelihood` function")
 
-        likelihoods = np.empty(X.shape[0], self.classes_.shape[0])
-        for i in range(likelihoods.shape[1]):
-            # taken from ex1 suggested solution
-            likelihoods[:, i] = self.pi_[i] * np.exp(- (X - self.mu_[i]) ** 2 / (2 * self.vars_[i])) / \
-                                np.sqrt(2 * np.pi * self.vars_[i])
+        likelihoods = np.zeros(shape=(X.shape[0], self.classes_.shape[0]))
+        for i in range(likelihoods.shape[0]):
+            for k in range(likelihoods.shape[1]):
+                for j in range(X.shape[1]):
+                    likelihoods[i][k] += np.log(self.pi_[k]) - \
+                                         0.5 * (((X[i][j] - self.mu_[k][j]) / self.vars_[k][j]) ** 2)
 
         return likelihoods
 

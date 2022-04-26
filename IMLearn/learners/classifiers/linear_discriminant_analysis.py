@@ -73,15 +73,10 @@ class LDA(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        a_k = np.empty(shape=(self.classes_.shape[0], self.mu_.shape[1]))
-        b_k = np.empty(self.classes_.shape[0])
-        for k in range(self.classes_.shape[0]):
-            a_k[k] = self._cov_inv.dot(self.mu_[k])
-            b_k[k] = np.log(self.pi_[k]) - 0.5 * (self.mu_[k].T.dot(self._cov_inv.dot(self.mu_[k])))
-
+        likelihood = self.likelihood(X)
         responses = np.empty(X.shape[0])
-        for i in range(X.shape[0]):
-            responses[i] = self.classes_[np.argmax(a_k.dot(X[i]) + b_k)]
+        for i in range(responses.shape[0]):
+            responses[i] = np.argmax(likelihood[i])
 
         return responses
 
@@ -104,13 +99,14 @@ class LDA(BaseEstimator):
             raise ValueError("Estimator must first be fitted before calling `likelihood` function")
 
         likelihoods = np.empty(shape=(X.shape[0], self.classes_.shape[0]))
-        cov_det = np.linalg.det(self.cov_)
-        for i in range(likelihoods.shape[1]):
-            d = X[:, np.newaxis, :] - self.mu_[i]
-            # taken from ex1 suggested solution
-            mahalanobis = np.sum(d.dot(inv(self.cov_)) * d, axis=2).flatten()
-            likelihoods[:, i] = self.pi_[i] * np.exp(-.5 * mahalanobis) / \
-                                np.sqrt((2 * np.pi) ** len(X) * cov_det)
+        a_k = np.empty(shape=(self.classes_.shape[0], self.mu_.shape[1]))
+        b_k = np.empty(self.classes_.shape[0])
+        for k in range(self.classes_.shape[0]):
+            a_k[k] = self._cov_inv.dot(self.mu_[k])
+            b_k[k] = np.log(self.pi_[k]) - 0.5 * (self.mu_[k].T.dot(self._cov_inv.dot(self.mu_[k])))
+
+        for i in range(X.shape[0]):
+            likelihoods[i] = a_k.dot(X[i]) + b_k
 
         return likelihoods
 

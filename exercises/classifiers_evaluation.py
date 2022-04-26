@@ -67,14 +67,14 @@ def compare_gaussian_classifiers():
 
         lda = LDA()
         lda.fit(train_x.to_numpy(), train_y.to_numpy())
-        gna = GaussianNaiveBayes()
-        gna.fit(train_x.to_numpy(), train_y.to_numpy())
+        gnb = GaussianNaiveBayes()
+        gnb.fit(train_x.to_numpy(), train_y.to_numpy())
 
         lda_y_pred = lda.predict(test_x.to_numpy())
-        # gna_y_pred = gna.predict(test_x.to_numpy())
+        gna_y_pred = gnb.predict(test_x.to_numpy())
 
         lda_accuracy = np.mean(lda_y_pred == test_y)
-        # gna_accuracy = np.mean(gna_y_pred == test_y)
+        gnb_accuracy = np.mean(gna_y_pred == test_y)
 
         # Plot a figure with two suplots, showing the Gaussian Naive Bayes predictions on the left and LDA predictions
         # on the right. Plot title should specify dataset used and subplot titles should specify algorithm and accuracy
