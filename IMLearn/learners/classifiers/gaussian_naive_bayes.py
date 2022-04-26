@@ -66,7 +66,8 @@ class GaussianNaiveBayes(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        raise NotImplementedError()
+        prob = np.log(self.pi_) - 0.5 * (((X - self.mu_) / self.vars_) ** 2)
+        return self.classes_[np.argmax(prob)]
 
     def likelihood(self, X: np.ndarray) -> np.ndarray:
         """
@@ -86,7 +87,13 @@ class GaussianNaiveBayes(BaseEstimator):
         if not self.fitted_:
             raise ValueError("Estimator must first be fitted before calling `likelihood` function")
 
-        raise NotImplementedError()
+        likelihoods = np.empty(X.shape[0], self.classes_.shape[0])
+        for i in range(likelihoods.shape[1]):
+            # taken from ex1 suggested solution
+            likelihoods[:, i] = self.pi_[i] * np.exp(- (X - self.mu_[i]) ** 2 / (2 * self.vars_[i])) / \
+                                np.sqrt(2 * np.pi * self.vars_[i])
+
+        return likelihoods
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """

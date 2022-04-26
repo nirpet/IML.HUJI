@@ -4,6 +4,7 @@ import numpy as np
 from numpy.linalg import det, inv
 from IMLearn.metrics.loss_functions import misclassification_error
 
+
 class LDA(BaseEstimator):
     """
     Linear Discriminant Analysis (LDA) classifier
@@ -55,7 +56,7 @@ class LDA(BaseEstimator):
             self.mu_[i] = (1.0 / n_k[i]) * np.sum(X[y == self.classes_[i]])
 
         mu_yi = np.vstack(self.mu_[y.astype(int)])
-        self.cov_ = (1.0 / m) * np.dot(X - mu_yi, (X - mu_yi).T)
+        self.cov_ = (1.0 / m) * np.dot((X - mu_yi).T, X - mu_yi)
         self._cov_inv = np.linalg.inv(self.cov_)
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
@@ -73,7 +74,7 @@ class LDA(BaseEstimator):
             Predicted responses of given samples
         """
         a = self._cov_inv.dot(self.mu_)
-        b = np.log(self.pi_) - 0.5 * self.mu_.dot(self._cov_inv.dot(self.mu_))
+        b = np.log(self.pi_) - 0.5 * np.dot(self.mu_.T, self._cov_inv.dot(self.mu_))
         return self.classes_[np.argmax(a.dot(X) + b)]
 
     def likelihood(self, X: np.ndarray) -> np.ndarray:
@@ -98,8 +99,10 @@ class LDA(BaseEstimator):
         cov_det = np.linalg.det(self.cov_)
         for i in range(likelihoods.shape[1]):
             d = X[:, np.newaxis, :] - self.mu_[i]
+            # taken from ex1 suggested solution
             mahalanobis = np.sum(d.dot(inv(self.cov_)) * d, axis=2).flatten()
-            likelihoods[:, i] = np.exp(-.5 * mahalanobis) / np.sqrt((2 * np.pi) ** len(X) * cov_det) * self.pi_[i]
+            likelihoods[:, i] = self.pi_[i] * np.exp(-.5 * mahalanobis) / \
+                                np.sqrt((2 * np.pi) ** len(X) * cov_det)
 
         return likelihoods
 
