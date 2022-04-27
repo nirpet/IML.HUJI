@@ -1,11 +1,11 @@
-import numpy as np
-
-from IMLearn.learners.classifiers import Perceptron, LDA, GaussianNaiveBayes
 from typing import Tuple
-from utils import *
+
+import numpy
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import pandas as pd
+
+from IMLearn.learners.classifiers import LDA, GaussianNaiveBayes, Perceptron
+from utils import *
 
 pio.templates.default = "simple_white"
 from math import atan2, pi
@@ -44,14 +44,27 @@ def run_perceptron():
     for n, f in [("Linearly Separable", "linearly_separable.npy"),
                  ("Linearly Inseparable", "linearly_inseparable.npy")]:
         # Load dataset
-        np.load(file="../datasets/" + f)
+        dataset = np.load(file="../datasets/" + f)
+        y = dataset[:, -1]
+        X = dataset[:, :-1]
 
         # Fit Perceptron and record loss in each fit iteration
         losses = []
-        raise NotImplementedError()
+
+        def perceptron_callback(per: Perceptron, sample: numpy.ndarray, response: int):
+            losses.append(perceptron.loss(X, y))
+
+        perceptron = Perceptron(callback=perceptron_callback)
+        perceptron.fit(X, y)
 
         # Plot figure of loss as function of fitting iteration
-        raise NotImplementedError()
+        fig = go.Figure([go.Scatter(x=np.arange(1, len(losses) + 1), y=losses, mode="markers+lines",
+                                    name="Loss per iteration")])
+        fig.update_layout(
+            title_text="Loss per iteration of dataset : " + f,
+            xaxis={"title": "iteration"},
+            yaxis={"title": "loss"})
+        fig.show()
 
 
 def get_ellipse(mu: np.ndarray, cov: np.ndarray):
@@ -103,7 +116,6 @@ def compare_gaussian_classifiers():
         # Plot a figure with two suplots, showing the Gaussian Naive Bayes predictions on the left and LDA predictions
         # on the right. Plot title should specify dataset used and subplot titles should specify algorithm and accuracy
         # Create subplots
-        from IMLearn.metrics import accuracy
         fig = make_subplots(rows=1, cols=2,
                             subplot_titles=["Gaussian naive Bayes, Accuracy: " + str(gnb_accuracy)
                                 , "Linear discriminant analysis, Accuracy: " + str(lda_accuracy)],
@@ -141,5 +153,5 @@ def compare_gaussian_classifiers():
 
 if __name__ == '__main__':
     np.random.seed(0)
-    # run_perceptron()
+    run_perceptron()
     compare_gaussian_classifiers()
