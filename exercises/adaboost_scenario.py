@@ -64,7 +64,7 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=
     T = [5, 50, 100, 250]
     lims = np.array([np.r_[train_X, test_X].min(axis=0), np.r_[train_X, test_X].max(axis=0)]).T + np.array([-.1, .1])
 
-    fig = make_subplots(rows=2, cols=2, subplot_titles=[rf"$\textbf{{sample size: {m}}}$" for m in T],
+    fig = make_subplots(rows=2, cols=2, subplot_titles=[rf"$\textbf{{number of learners: {m}}}$" for m in T],
                         horizontal_spacing=0.01, vertical_spacing=.03)
 
     best_ensemble_size = 0
@@ -86,7 +86,7 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=
             best_ensemble_loss = loss
             best_ensemble_size = T[i]
 
-    fig.update_layout(title=rf"$\textbf{{Decision bounderies by sample size}}$", margin=dict(t=100)) \
+    fig.update_layout(title=rf"$\textbf{{Decision boundaries by number of learners}}$", margin=dict(t=100)) \
         .update_xaxes(visible=False).update_yaxes(visible=False)
     fig.show()
 
