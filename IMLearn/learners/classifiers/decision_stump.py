@@ -78,6 +78,7 @@ class DecisionStump(BaseEstimator):
         responses = np.empty(X.shape[1])
         responses[X[self.j_] >= self.threshold_] = self.sign_
         responses[X[self.j_] < self.threshold_] = -self.sign_
+        return responses
 
     def _find_threshold(self, values: np.ndarray, labels: np.ndarray, sign: int) -> Tuple[float, float]:
         """
