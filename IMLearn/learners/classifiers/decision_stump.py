@@ -28,7 +28,7 @@ class DecisionStump(BaseEstimator):
         Instantiate a Decision stump classifier
         """
         super().__init__()
-        self.threshold_, self.j_, self.sign_ = None, None, None
+        self.threshold_, self.j_, self.sign_ = None, None, 1
 
     def _fit(self, X: np.ndarray, y: np.ndarray) -> NoReturn:
         """
@@ -42,7 +42,6 @@ class DecisionStump(BaseEstimator):
         y : ndarray of shape (n_samples, )
             Responses of input data to fit to
         """
-        self.sign_ = np.abs(y[0])
         feature = X[:0]
         self.threshold_, error = self._find_threshold(feature, y, self.sign_)
         self.j_ = 0
@@ -120,7 +119,7 @@ class DecisionStump(BaseEstimator):
             pred[:i] = -sign
             pred[i:] = sign
             pred = pred - labels
-            error = pred[pred != 0].shape[0] / values.shape[0]
+            error = np.mean(labels[np.sign(pred, labels) != self.sign_])
             if error < threshold_error:
                 threshold_error = error
                 threshold_index = i
@@ -145,5 +144,5 @@ class DecisionStump(BaseEstimator):
             Performance under missclassification loss function
         """
         y_pred = self.predict(X)
-        from ...metrics import misclassification_error
-        return misclassification_error(y, y_pred)
+        errors = y[np.sign(y_pred, y) != self.sign_]
+        return np.mean(np.abs(errors))
