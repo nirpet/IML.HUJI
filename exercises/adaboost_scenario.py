@@ -61,10 +61,10 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=
     fig.show()
 
     # Question 2: Plotting decision surfaces
-    T = [5, 50, 100, 250]
+    T = [1, 5, 10, 25]
     lims = np.array([np.r_[train_X, test_X].min(axis=0), np.r_[train_X, test_X].max(axis=0)]).T + np.array([-.1, .1])
 
-    fig = make_subplots(rows=2, cols=3, subplot_titles=[rf"$\textbf{{sample size: {m}}}$" for m in T],
+    fig = make_subplots(rows=2, cols=2, subplot_titles=[rf"$\textbf{{sample size: {m}}}$" for m in T],
                         horizontal_spacing=0.01, vertical_spacing=.03)
 
     best_ensemble_size = 0
@@ -113,7 +113,7 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=
 
     train_vis.add_traces([decision_surface(best_ensemble_predict, lims[0], lims[1], showscale=False),
                           go.Scatter(x=train_X[:, 0], y=train_X[:, 1], mode="markers", showlegend=False,
-                                     marker=dict(size=point_size, color=train_y, symbol='circle',
+                                     marker=dict(size=point_size * 5, color=train_y, symbol='circle',
                                                  colorscale=[custom[0], custom[-1]],
                                                  line=dict(color="black", width=1)))],
                          rows=1, cols=1)
