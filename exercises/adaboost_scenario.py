@@ -66,7 +66,9 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=
 
     fig = make_subplots(rows=2, cols=3, subplot_titles=[rf"$\textbf{{sample size: {m}}}$" for m in T],
                         horizontal_spacing=0.01, vertical_spacing=.03)
-    symbols = np.array(["circle", "x"])
+
+    best_ensemble_size = 0
+    best_ensemble_loss = 1
 
     for i in range(len(T)):
         t = T[i]
@@ -76,28 +78,53 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=
 
         fig.add_traces([decision_surface(predict, lims[0], lims[1], showscale=False),
                         go.Scatter(x=test_X[:, 0], y=test_X[:, 1], mode="markers", showlegend=False,
-                                   marker=dict(color=test_y, symbol=symbols[test_y], colorscale=[custom[0], custom[-1]],
+                                   marker=dict(color=test_y, symbol='circle', colorscale=[custom[0], custom[-1]],
                                                line=dict(color="black", width=1)))],
                        rows=(i // 2) + 1, cols=(i % 2) + 1)
+        loss = adaboost.partial_loss(test_X, test_y, T[i])
+        if loss < best_ensemble_loss:
+            best_ensemble_loss = loss
+            best_ensemble_size = T[i]
 
     fig.update_layout(title=rf"$\textbf{{Decision bounderies by sample size}}$", margin=dict(t=100)) \
         .update_xaxes(visible=False).update_yaxes(visible=False)
     fig.show()
-    #
+
     # # Question 3: Decision surface of best performing ensemble
-    # best_ensemble = go.Figure([decision_surface(adaboost.predict, lims[0], lims[1], showscale=False), \
-    #                 go.Scatter(x=test_X[:, 0], y=test_X[:, 1], mode="markers", showlegend=False,
-    #                            marker=dict(color=test_y, symbol=symbols[test_y], colorscale=[custom[0], custom[-1]],
-    #                                        line=dict(color="black", width=1)))])
-    # best_ensemble.update_layout(title=rf"$\textbf{{Best ensemble prediction {best_ensemble}}$", margin=dict(t=100)) \
-    #     .update_xaxes(visible=False).update_yaxes(visible=False)
-    # best_ensemble.show()
-    #
-    # # Question 4: Decision surface with weighted samples
-    # raise NotImplementedError()
+    def best_ensemble_predict(X):
+        return adaboost.partial_predict(X, best_ensemble_size)
+
+    best_ensemble = make_subplots(rows=1, cols=1, horizontal_spacing=0.01, vertical_spacing=.03)
+
+    best_ensemble.add_traces([decision_surface(best_ensemble_predict, lims[0], lims[1], showscale=False),
+                              go.Scatter(x=test_X[:, 0], y=test_X[:, 1], mode="markers", showlegend=False,
+                                         marker=dict(color=test_y, symbol='circle', colorscale=[custom[0], custom[-1]],
+                                                     line=dict(color="black", width=1)))],
+                             rows=1, cols=1)
+    best_ensemble.update_layout(
+        title=rf"$\textbf{{Best ensemble size: {best_ensemble_size}, Accuracy: {1 - best_ensemble_loss}}}$",
+        margin=dict(t=100)) \
+        .update_xaxes(visible=False).update_yaxes(visible=False)
+    best_ensemble.show()
+
+    # Question 4: Decision surface with weighted samples
+    point_size = adaboost.D_ / np.max(adaboost.D_) * 5
+    train_vis = make_subplots(rows=1, cols=1, horizontal_spacing=0.01, vertical_spacing=.03)
+
+    train_vis.add_traces([decision_surface(best_ensemble_predict, lims[0], lims[1], showscale=False),
+                          go.Scatter(x=train_X[:, 0], y=train_X[:, 1], mode="markers", showlegend=False,
+                                     marker=dict(size=point_size, color=train_y, symbol='circle',
+                                                 colorscale=[custom[0], custom[-1]],
+                                                 line=dict(color="black", width=1)))],
+                         rows=1, cols=1)
+    train_vis.update_layout(
+        title=rf"$\textbf{{Best ensemble size: {best_ensemble_size}, Accuracy: {1 - best_ensemble_loss}}}$",
+        margin=dict(t=100)) \
+        .update_xaxes(visible=False).update_yaxes(visible=False)
+    train_vis.show()
 
 
 if __name__ == '__main__':
     np.random.seed(0)
     fit_and_evaluate_adaboost(0)
-    # fit_and_evaluate_adaboost(0.4)
+    fit_and_evaluate_adaboost(0.4)
