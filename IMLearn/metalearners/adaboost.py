@@ -50,20 +50,19 @@ class AdaBoost(BaseEstimator):
         y : ndarray of shape (n_samples, )
             Responses of input data to fit to
         """
+        self.D_ = np.empty(y.shape[0])
         self.D_.fill(1 / y.shape[0])
-        self.weights_ = list()
-        self.weights_.append(self.D_)
-        self.models_ = list()
+        self.weights_ = np.empty(self.iterations_)
+        self.models_ = []
         for t in range(self.iterations_):
-            weak_learner = self.wl_()
-            weak_learner.fit(X, y * self.D_)
-            prediction = weak_learner.predict(X)
-            epsilon_t = np.sum(prediction[prediction != y])
-            self.models_.append(weak_learner)
-            w_t = 0.5 * np.log((1 / epsilon_t) - 1)
-            self.D_ = self.D_ * np.exp(-y*w_t*prediction)
+            model = self.wl_()
+            model.fit(X, y * self.D_)
+            self.models_.append(model)
+            prediction = self.models_[t].predict(X)
+            epsilon_t = np.sum(np.abs((prediction - y) / 2).dot(self.D_))
+            self.weights_[t] = 0.5 * np.log((1 / epsilon_t) - 1)
+            self.D_ = self.D_ * np.exp(-y * self.weights_[t] * prediction)
             self.D_ = self.D_ / np.sum(self.D_)
-            self.weights_.append(self.D_)
 
     def _predict(self, X):
         """
@@ -79,7 +78,7 @@ class AdaBoost(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        return self.partial_predict(X, X.shape[0])
+        return self.partial_predict(X, self.iterations_)
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
@@ -98,7 +97,7 @@ class AdaBoost(BaseEstimator):
         loss : float
             Performance under missclassification loss function
         """
-        return self.partial_loss(X, y, X.shape[0])
+        return self.partial_loss(X, y, self.iterations_)
 
     def partial_predict(self, X: np.ndarray, T: int) -> np.ndarray:
         """
@@ -144,4 +143,4 @@ class AdaBoost(BaseEstimator):
             Performance under missclassification loss function
         """
         predicted = self.partial_predict(X, T)
-        return loss_functions.mean_square_error(y, predicted)
+        return loss_functions.misclassification_error(y, predicted)
