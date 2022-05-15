@@ -111,14 +111,17 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=
     point_size = adaboost.D_ / np.max(adaboost.D_) * 5
     train_vis = make_subplots(rows=1, cols=1, horizontal_spacing=0.01, vertical_spacing=.03)
 
-    train_vis.add_traces([decision_surface(best_ensemble_predict, lims[0], lims[1], showscale=False),
+    def full_ensemble_predict(X):
+        return adaboost.partial_predict(X, 250)
+
+    train_vis.add_traces([decision_surface(full_ensemble_predict, lims[0], lims[1], showscale=False),
                           go.Scatter(x=train_X[:, 0], y=train_X[:, 1], mode="markers", showlegend=False,
                                      marker=dict(size=point_size, color=train_y, symbol='circle',
                                                  colorscale=[custom[0], custom[-1]],
                                                  line=dict(color="black", width=1)))],
                          rows=1, cols=1)
     train_vis.update_layout(
-        title=rf"$\textbf{{Weighted samples, ensemble size: {best_ensemble_size} Accuracy: {1 - best_ensemble_loss}}}$",
+        title=rf"$\textbf{{Weighted samples decisions boundaries}}$",
         margin=dict(t=100)) \
         .update_xaxes(visible=False).update_yaxes(visible=False)
     train_vis.show()
