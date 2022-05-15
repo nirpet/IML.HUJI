@@ -102,7 +102,7 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=
                                                      line=dict(color="black", width=1)))],
                              rows=1, cols=1)
     best_ensemble.update_layout(
-        title=rf"$\textbf{{Best ensemble size: {best_ensemble_size}, Accuracy: {1 - best_ensemble_loss}}}$",
+        title=rf"$\textbf{{Best ensemble size: {best_ensemble_size} Accuracy: {1 - best_ensemble_loss}}}$",
         margin=dict(t=100)) \
         .update_xaxes(visible=False).update_yaxes(visible=False)
     best_ensemble.show()
@@ -118,7 +118,7 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=
                                                  line=dict(color="black", width=1)))],
                          rows=1, cols=1)
     train_vis.update_layout(
-        title=rf"$\textbf{{Best ensemble size: {best_ensemble_size}, Accuracy: {1 - best_ensemble_loss}}}$",
+        title=rf"$\textbf{{Weighted samples, ensemble size: {best_ensemble_size} Accuracy: {1 - best_ensemble_loss}}}$",
         margin=dict(t=100)) \
         .update_xaxes(visible=False).update_yaxes(visible=False)
     train_vis.show()
