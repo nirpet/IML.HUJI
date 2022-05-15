@@ -67,9 +67,6 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=
     fig = make_subplots(rows=2, cols=2, subplot_titles=[rf"$\textbf{{number of learners: {m}}}$" for m in T],
                         horizontal_spacing=0.01, vertical_spacing=.03)
 
-    best_ensemble_size = 0
-    best_ensemble_loss = 1
-
     for i in range(len(T)):
         t = T[i]
 
@@ -81,16 +78,20 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=
                                    marker=dict(color=test_y, symbol='circle', colorscale=[custom[0], custom[-1]],
                                                line=dict(color="black", width=1)))],
                        rows=(i // 2) + 1, cols=(i % 2) + 1)
-        loss = adaboost.partial_loss(test_X, test_y, T[i])
-        if loss < best_ensemble_loss:
-            best_ensemble_loss = loss
-            best_ensemble_size = T[i]
 
     fig.update_layout(title=rf"$\textbf{{Decision boundaries by number of learners}}$", margin=dict(t=100)) \
         .update_xaxes(visible=False).update_yaxes(visible=False)
     fig.show()
 
     # # Question 3: Decision surface of best performing ensemble
+    best_ensemble_loss = 1
+    best_ensemble_size = 1
+    for i in range(1, n_learners + 1):
+        loss = adaboost.partial_loss(test_X, test_y, i)
+        if loss < best_ensemble_loss:
+            best_ensemble_loss = loss
+            best_ensemble_size = i
+
     def best_ensemble_predict(X):
         return adaboost.partial_predict(X, best_ensemble_size)
 
