@@ -141,12 +141,12 @@ def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 50
     fig.show()
 
     # Question 8 - Compare best Ridge model, best Lasso model and Least Squares model
-    min_lam_ridge = ridge_validation_score.min()
+    min_lam_ridge = regularization[ridge_validation_score.argmin()]
     best_ridge_lam_estimator = RidgeRegression(min_lam_ridge)
     best_ridge_lam_estimator.fit(X_train, y_train)
     print("Ridge best regularization param: " + str(min_lam_ridge))
 
-    min_lam_lasso = lasso_validation_score.min()
+    min_lam_lasso = regularization[lasso_validation_score.argmin()]
     best_lasso_lam_estimator = sklearn.linear_model.Lasso(alpha=min_lam_lasso)
     best_lasso_lam_estimator.fit(X_train, y_train)
     print("Lasso best regularization param: " + str(min_lam_lasso))
