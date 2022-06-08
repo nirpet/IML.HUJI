@@ -25,8 +25,8 @@ def select_polynomial_degree(n_samples: int = 100, noise: float = 5):
     """
     # Question 1 - Generate dataset for model f(x)=(x+3)(x+2)(x+1)(x-1)(x-2) + eps for eps Gaussian noise
     # and split into training- and testing portions
-    epsilon = np.random.normal(0, np.sqrt(noise), n_samples)
-    X = np.random.uniform(-1.2, 2, n_samples)
+    epsilon = np.random.normal(0, noise, n_samples)
+    X = np.linspace(-1.2, 2, n_samples)
     noiseless_y = (X + 3) * (X + 2) * (X + 1) * (X - 1) * (X - 2)
     y = noiseless_y + epsilon
 
@@ -94,14 +94,13 @@ def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 50
     diabetes = datasets.load_diabetes()
     X = pd.DataFrame(data=diabetes.data, columns=diabetes.feature_names)
     y = pd.Series(diabetes.target)
-    X_train, y_train, X_test, y_test = split_train_test(X, y, n_samples / len(X))
-    X_train = X_train.to_numpy()
-    y_train = y_train.to_numpy()
-    X_test = X_test.to_numpy()
-    y_test = y_test.to_numpy()
+    X_train = X[:n_samples].to_numpy()
+    y_train = y[:n_samples].to_numpy()
+    X_test = X[n_samples:].to_numpy()
+    y_test = y[n_samples:].to_numpy()
 
     # Question 7 - Perform CV for different values of the regularization parameter for Ridge and Lasso regressions
-    regularization = np.linspace(0, 2.495, 500)
+    regularization = np.linspace(0, 2.5, n_evaluations)
     ridge_train_score = np.empty(n_evaluations)
     ridge_validation_score = np.empty(n_evaluations)
     lasso_train_score = np.empty(n_evaluations)
@@ -164,7 +163,7 @@ def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 50
 
 if __name__ == '__main__':
     np.random.seed(0)
-    select_polynomial_degree()
-    select_polynomial_degree(100, 0)
-    select_polynomial_degree(1500, 10)
+    # select_polynomial_degree()
+    # select_polynomial_degree(100, 0)
+    # select_polynomial_degree(1500, 10)
     select_regularization_parameter()
