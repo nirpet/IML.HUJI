@@ -1,6 +1,9 @@
 from __future__ import annotations
 import numpy as np
 import pandas as pd
+import pickle
+
+import sklearn.linear_model
 from sklearn import datasets
 from IMLearn.metrics import mean_square_error
 from IMLearn.utils import split_train_test
@@ -93,17 +96,57 @@ def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 50
         Number of regularization parameter values to evaluate for each of the algorithms
     """
     # Question 6 - Load diabetes dataset and split into training and testing portions
-    raise NotImplementedError()
+    diabetes = datasets.load_diabetes()
+    X = pd.DataFrame(data=diabetes.data, columns=diabetes.feature_names)
+    y = pd.Series(diabetes.target)
+    X_train, y_train, X_test, y_test = split_train_test(X, y, 0.114)
+    X_train = X_train.to_numpy()
+    y_train = y_train.to_numpy()
+    X_test = X_test.to_numpy()
+    y_test = y_test.to_numpy()
 
     # Question 7 - Perform CV for different values of the regularization parameter for Ridge and Lasso regressions
-    raise NotImplementedError()
+    regularization = np.linspace(0, 2.495, 500)
+    ridge_train_score = np.empty(n_evaluations)
+    ridge_validation_score = np.empty(n_evaluations)
+    lasso_train_score = np.empty(n_evaluations)
+    lasso_validation_score = np.empty(n_evaluations)
+
+    for k in range(n_evaluations):
+        ridge_train_score[k], ridge_validation_score[k] = \
+            cross_validate(RidgeRegression(regularization[k]), X_train, y_train, mean_square_error)
+        lasso_train_score[k], lasso_validation_score[k] = \
+            cross_validate(sklearn.linear_model.Lasso(alpha=regularization[k]), X_train, y_train, mean_square_error)
+
+    fig1 = go.Scatter(x=regularization, y=ridge_train_score, mode='lines',
+                      marker=dict(color="red"), name="train")
+    fig2 = go.Scatter(x=regularization, y=ridge_validation_score, mode='lines',
+                      marker=dict(color="blue"), name="validation")
+    fig = go.Figure([fig1, fig2])
+    fig.update_layout(
+        title=rf"$\textbf{{Ridge average train and validation based on regularization param}}$",
+        xaxis={"title": "score"},
+        yaxis={"title": "lambda"})
+    fig.show()
+
+    fig1 = go.Scatter(x=regularization, y=lasso_train_score, mode='lines',
+                      marker=dict(color="red"), name="train")
+    fig2 = go.Scatter(x=regularization, y=lasso_validation_score, mode='lines',
+                      marker=dict(color="blue"), name="validation")
+    fig = go.Figure([fig1, fig2])
+    fig.update_layout(
+        title=rf"$\textbf{{Lasso average train and validation based on regularization param}}$",
+        xaxis={"title": "score"},
+        yaxis={"title": "lambda"})
+    fig.show()
 
     # Question 8 - Compare best Ridge model, best Lasso model and Least Squares model
-    raise NotImplementedError()
+    # raise NotImplementedError()
 
 
 if __name__ == '__main__':
     np.random.seed(0)
-    select_polynomial_degree()
-    select_polynomial_degree(100, 0)
-    select_polynomial_degree(1500, 10)
+    # select_polynomial_degree()
+    # select_polynomial_degree(100, 0)
+    # select_polynomial_degree(1500, 10)
+    select_regularization_parameter()
