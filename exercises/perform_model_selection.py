@@ -1,19 +1,14 @@
 from __future__ import annotations
-import numpy as np
-import pandas as pd
-import pickle
 
+import plotly.graph_objects as go
 import sklearn.linear_model
 from sklearn import datasets
-from IMLearn.metrics import mean_square_error, loss_functions
-from IMLearn.utils import split_train_test
-from IMLearn.model_selection import cross_validate
-from IMLearn.learners.regressors import PolynomialFitting, LinearRegression, RidgeRegression
-from sklearn.linear_model import Lasso
 
+from IMLearn.learners.regressors import PolynomialFitting, LinearRegression, RidgeRegression
+from IMLearn.metrics import mean_square_error, loss_functions
+from IMLearn.model_selection import cross_validate
+from IMLearn.utils import split_train_test
 from utils import *
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 
 
 def select_polynomial_degree(n_samples: int = 100, noise: float = 5):
@@ -99,7 +94,7 @@ def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 50
     diabetes = datasets.load_diabetes()
     X = pd.DataFrame(data=diabetes.data, columns=diabetes.feature_names)
     y = pd.Series(diabetes.target)
-    X_train, y_train, X_test, y_test = split_train_test(X, y, 0.114)
+    X_train, y_train, X_test, y_test = split_train_test(X, y, n_samples / len(X))
     X_train = X_train.to_numpy()
     y_train = y_train.to_numpy()
     X_test = X_test.to_numpy()
