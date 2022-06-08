@@ -5,7 +5,7 @@ import pickle
 
 import sklearn.linear_model
 from sklearn import datasets
-from IMLearn.metrics import mean_square_error
+from IMLearn.metrics import mean_square_error, loss_functions
 from IMLearn.utils import split_train_test
 from IMLearn.model_selection import cross_validate
 from IMLearn.learners.regressors import PolynomialFitting, LinearRegression, RidgeRegression
@@ -141,12 +141,35 @@ def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 50
     fig.show()
 
     # Question 8 - Compare best Ridge model, best Lasso model and Least Squares model
-    # raise NotImplementedError()
+    min_lam_ridge = ridge_validation_score.min()
+    best_ridge_lam_estimator = RidgeRegression(min_lam_ridge)
+    best_ridge_lam_estimator.fit(X_train, y_train)
+    print("Ridge best regularization param: " + str(min_lam_ridge))
 
+    min_lam_lasso = lasso_validation_score.min()
+    best_lasso_lam_estimator = sklearn.linear_model.Lasso(alpha=min_lam_lasso)
+    best_lasso_lam_estimator.fit(X_train, y_train)
+    print("Lasso best regularization param: " + str(min_lam_lasso))
 
-if __name__ == '__main__':
-    np.random.seed(0)
-    # select_polynomial_degree()
-    # select_polynomial_degree(100, 0)
-    # select_polynomial_degree(1500, 10)
+    ridge_estimator = RidgeRegression(min_lam_ridge)
+    lasso_estimator = sklearn.linear_model.Lasso(alpha=min_lam_lasso)
+    least_squares_estimator = LinearRegression()
+
+    ridge_estimator.fit(X_train, y_train)
+    lasso_estimator.fit(X_train, y_train)
+    least_squares_estimator.fit(X_train, y_train)
+
+    ridge_score = ridge_estimator.loss(X_test, y_test)
+    lasso_pred = lasso_estimator.predict(X_test)
+    lasso_score = loss_functions.mean_square_error(y_test, lasso_pred)
+    least_squares_score = least_squares_estimator.loss(X_test, y_test)
+
+    print("Ridge score: " + str(round(ridge_score, 2)) + ", Lasso score: " + str(round(lasso_score, 2))
+          + ", Least squares score: " + str(round(least_squares_score, 2)))
+
+    if __name__ == '__main__':
+        np.random.seed(0)
+    select_polynomial_degree()
+    select_polynomial_degree(100, 0)
+    select_polynomial_degree(1500, 10)
     select_regularization_parameter()
