@@ -167,8 +167,8 @@ def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 50
     print("Ridge score: " + str(round(ridge_score, 2)) + ", Lasso score: " + str(round(lasso_score, 2))
           + ", Least squares score: " + str(round(least_squares_score, 2)))
 
-    if __name__ == '__main__':
-        np.random.seed(0)
+if __name__ == '__main__':
+    np.random.seed(0)
     select_polynomial_degree()
     select_polynomial_degree(100, 0)
     select_polynomial_degree(1500, 10)
