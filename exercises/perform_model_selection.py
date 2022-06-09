@@ -70,11 +70,12 @@ def select_polynomial_degree(n_samples: int = 100, noise: float = 5):
     fig.show()
 
     # Question 3 - Using best value of k, fit a k-degree polynomial model and report test error
-    min_k = train_scores.argmin()
+    min_k = validation_scores.argmin()
     best_polynomial_degree_estimator = PolynomialFitting(min_k)
     best_polynomial_degree_estimator.fit(X_train, y_train)
     test_error = best_polynomial_degree_estimator.loss(X_test, y_test)
     print("best degree: " + str(min_k) + " error: " + str(round(test_error, 2)))
+    print("validation score: " + str(round(validation_scores[min_k], 2)))
 
 
 def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 500):
@@ -161,9 +162,10 @@ def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 50
     print("Ridge score: " + str(round(ridge_score, 2)) + ", Lasso score: " + str(round(lasso_score, 2))
           + ", Least squares score: " + str(round(least_squares_score, 2)))
 
+
 if __name__ == '__main__':
     np.random.seed(0)
-    # select_polynomial_degree()
-    # select_polynomial_degree(100, 0)
-    # select_polynomial_degree(1500, 10)
+    select_polynomial_degree()
+    select_polynomial_degree(100, 0)
+    select_polynomial_degree(1500, 10)
     select_regularization_parameter()
